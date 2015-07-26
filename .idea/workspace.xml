@@ -26,8 +26,8 @@
       <file leaf-file-name="energy-monitor.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/energy-monitor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.3125" vertical-offset="0" max-vertical-offset="768">
-              <caret line="17" column="32" selection-start-line="17" selection-start-column="32" selection-end-line="17" selection-end-column="32" />
+            <state vertical-scroll-proportion="0.44921875" vertical-offset="0" max-vertical-offset="768">
+              <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -46,8 +46,8 @@
       <file leaf-file-name="logger.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dsmr_p1/logger.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1679" max-vertical-offset="2460">
-              <caret line="150" column="12" selection-start-line="150" selection-start-column="12" selection-end-line="150" selection-end-column="12" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="1604" max-vertical-offset="2385">
+              <caret line="153" column="13" selection-start-line="153" selection-start-column="13" selection-end-line="153" selection-end-column="13" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -488,8 +488,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dsmr_p1/logger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1679" max-vertical-offset="2460">
-          <caret line="150" column="12" selection-start-line="150" selection-start-column="12" selection-end-line="150" selection-end-column="12" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="1604" max-vertical-offset="2385">
+          <caret line="153" column="13" selection-start-line="153" selection-start-column="13" selection-end-line="153" selection-end-column="13" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
@@ -498,8 +498,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/energy-monitor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3125" vertical-offset="0" max-vertical-offset="768">
-          <caret line="17" column="32" selection-start-line="17" selection-start-column="32" selection-end-line="17" selection-end-column="32" />
+        <state vertical-scroll-proportion="0.44921875" vertical-offset="0" max-vertical-offset="768">
+          <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
           <folding />
         </state>
       </provider>

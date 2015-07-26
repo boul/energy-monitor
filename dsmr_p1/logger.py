@@ -151,9 +151,4 @@ class P1Telegram():
             return telegram_values
 
             # # Print the lines to screen
-            # for code, value in sorted(telegram_values.items()):
-            #     if code in list_of_interesting_codes:
-            #         # Cleanup value
-            #         value = float(value.lstrip(b'\(').rstrip(b'\)*kWhA'))
-            #         # Print nicely formatted string
-            #     print("{0:<63}{1:>8}".format(list_of_interesting_codes[code], value))
+            #

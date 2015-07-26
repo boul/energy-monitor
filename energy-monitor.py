@@ -15,4 +15,11 @@ print stats.get_last_stats()
 
 p1_telegram = P1Telegram("/dev/ttyUSB0", debug=True)
 
-print p1_telegram.get_telegram()
+vals = p1_telegram.get_telegram()
+
+for code, value in sorted(vals.items()):
+    if code in p1_telegram.ist_of_interesting_codes:
+        # Cleanup value
+        value = float(value.lstrip(b'\(').rstrip(b'\)*kWhA'))
+        # Print nicely formatted string
+    print("{0:<63}{1:>8}".format(p1_telegram.list_of_interesting_codes[code], value))
