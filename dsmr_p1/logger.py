@@ -60,7 +60,7 @@ class P1Telegram():
 
         # Debugging settings
         #test = self.test   # Use serial or file as input
-        debugging = 1   # Show extra output
+        debugging = self.debug   # Show extra output
 
         # Program variables
         # The true telegram ends with an exclamation mark after a CR/LF
