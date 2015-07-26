@@ -148,7 +148,7 @@ class P1Telegram():
                     value = ''.join(re.split(b'(\()', telegram_line)[1:])
                     telegram_values[code] = value
 
-        return telegram_values
+            return telegram_values
 
             # # Print the lines to screen
             # for code, value in sorted(telegram_values.items()):

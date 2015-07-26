@@ -13,6 +13,6 @@ stats = Vsn300Reader(host, headers, inverter_serial)
 
 print stats.get_last_stats()
 
-p1_telegram = P1Telegram("/dev/ttyUSB0")
+p1_telegram = P1Telegram("/dev/ttyUSB0", debug=True)
 
 print p1_telegram.get_telegram()
