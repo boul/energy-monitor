@@ -9,7 +9,7 @@ host = 'abb-135541-3g96-3712.local'
 inverter_serial = '135541-3G96-3712'
 pvoutput_api_key = 'c5475f9b694e00c4b1e649a871448603b3051c4d'
 pvoutput_system_id = '39538'
-pvoutput_interval = 60
+pvoutput_interval = 300
 carbon_host = 'admin.boul.nl'
 carbon_port = '2003'
 carbon_base_path = 'power.'
@@ -61,7 +61,7 @@ class CustomTimer(threading._Timer):
         return self.result
 
 
-def get_p1_data():
+def thread_get_p1_data():
 
     global glob_p1_data
 
@@ -73,7 +73,7 @@ def get_p1_data():
     return True
 
 
-def get_pv_data():
+def thread_get_pv_data():
 
     global glob_pv_data
 
@@ -86,7 +86,7 @@ def get_pv_data():
     return True
 
 
-def send_p1_data_to_carbon():
+def thread_send_p1_data_to_carbon():
 
     logger.info('SENDING P1 metrics to Carbon / Graphite')
 
@@ -102,7 +102,7 @@ def send_p1_data_to_carbon():
     return True
 
 
-def send_pv_data_to_carbon():
+def thread_send_pv_data_to_carbon():
 
     logger.info('SENDING PV metrics to Carbon / Graphite')
 
@@ -118,7 +118,7 @@ def send_pv_data_to_carbon():
     return True
 
 
-def send_data_to_pvoutput():
+def thread_send_data_to_pvoutput():
 
     logger.info('SENDING metrics to pvoutput.org')
     pv_output = pvoutput.PvStatus(pvoutput_api_key, pvoutput_system_id)
@@ -166,11 +166,25 @@ def send_data_to_pvoutput():
 
 def main():
 
-    get_p1_data()
-    #send_p1_data_to_carbon()
-    get_pv_data()
-    #send_pv_data_to_carbon()
-    send_data_to_pvoutput()
+    logger.info("Starting P1 Thread with interval: {0} secs".
+                format(p1_interval))
+    thread_get_p1_data()
+
+    logger.info("Startnig P1 data to carbon Thread with interval: {0} secs".
+                format(p1_interval))
+    thread_send_p1_data_to_carbon()
+
+    logger.info("Starting PV Thread with interval: {0} secs".
+                format(pv_interval))
+    thread_get_pv_data()
+
+    logger.info("Starting PV data to carbon Thread with interval: {0} secs".
+                format(pv_interval))
+    thread_send_pv_data_to_carbon()
+
+    logger.info("Starting PV Outpyt Thread with interval: {0} secs".
+                format(pvoutput_interval))
+    thread_send_data_to_pvoutput()
 
 
 if __name__ == "__main__":
