@@ -13,8 +13,8 @@ class PvStatus():
 
         self.logger = logging.getLogger(__name__)
 
-    def send_metric(self, kwh_generated, watt_ac_generated, kwh_consumed=None,
-                    watt_ac_consumed=None, volt_dc=None, temp_c=None):
+    def send_metric(self, kwh_generated, watt_ac_generated, kwh_consumed="",
+                    watt_ac_consumed="", volt_dc="", temp_c=""):
 
         now = datetime.datetime.now()
 
