@@ -48,20 +48,6 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-class CustomTimer(threading._Timer):
-    def __init__(self, interval, function, args=[], kwargs={}):
-        self._original_function = function
-        super(CustomTimer, self).__init__(
-            interval, self._do_execute, args, kwargs)
-
-    def _do_execute(self, *a, **kw):
-        self.result = self._original_function(*a, **kw)
-
-    def join(self):
-        super(CustomTimer, self).join()
-        return self.result
-
-
 def thread_get_p1_data():
 
     global glob_p1_data
@@ -70,7 +56,7 @@ def thread_get_p1_data():
     p1_meter = dsmr4_p1.Meter("/dev/ttyUSB0", simulate=simulate)
     glob_p1_data = p1_meter.get_telegram()
 
-    threading.Timer(p1_interval, get_p1_data).start()
+    threading.Timer(p1_interval, thread_get_p1_data).start()
     return True
 
 
@@ -82,7 +68,7 @@ def thread_get_pv_data():
     pv_meter = abb_vsn300.Vsn300Reader(host, headers, inverter_serial)
     glob_pv_data = pv_meter.get_last_stats()
 
-    threading.Timer(pv_interval, get_pv_data).start()
+    threading.Timer(pv_interval, thread_get_pv_data).start()
 
     return True
 
@@ -98,7 +84,7 @@ def thread_send_p1_data_to_carbon():
         path = carbon_base_path + "p1." + k
         server.send_metric(path, v)
 
-    threading.Timer(p1_interval, send_p1_data_to_carbon).start()
+    threading.Timer(p1_interval, thread_send_p1_data_to_carbon).start()
 
     return True
 
@@ -114,7 +100,7 @@ def thread_send_pv_data_to_carbon():
         path = carbon_base_path + "pv." + k
         server.send_metric(path, v)
 
-    threading.Timer(pv_interval, send_pv_data_to_carbon).start()
+    threading.Timer(pv_interval, thread_send_pv_data_to_carbon).start()
 
     return True
 
@@ -160,7 +146,7 @@ def thread_send_data_to_pvoutput():
                           dcv,
                           totals=1)
 
-    threading.Timer(pvoutput_interval, send_data_to_pvoutput).start()
+    threading.Timer(pvoutput_interval, thread_send_data_to_pvoutput).start()
 
     return True
 
