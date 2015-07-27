@@ -40,15 +40,15 @@ OBIS = {
     '1-0:32.36.0': ('V-swells-l1', _id),
     '1-0:52.36.0': ('V-swells-l2', _id),
     '1-0:72.36.0': ('V-swells-l3', _id),
-    '1-0:31.7.0': ('A-l1', _id),
-    '1-0:51.7.0': ('A-l2', _id),
-    '1-0:71.7.0': ('A-l3', _id),
-    '1-0:21.7.0': ('W-l1-in', _id),
-    '1-0:41.7.0': ('W-l2-in', _id),
-    '1-0:61.7.0': ('W-l3-in', _id),
-    '1-0:22.7.0': ('W-l1-out', _id),
-    '1-0:42.7.0': ('W-l2-out', _id),
-    '1-0:62.7.0': ('W-l3-out', _id),
+    '1-0:31.7.0': ('A-l1', _unit),
+    '1-0:51.7.0': ('A-l2', _unit),
+    '1-0:71.7.0': ('A-l3', _unit),
+    '1-0:21.7.0': ('W-l1-in', _unit),
+    '1-0:41.7.0': ('W-l2-in', _unit),
+    '1-0:61.7.0': ('W-l3-in', _unit),
+    '1-0:22.7.0': ('W-l1-out', _unit),
+    '1-0:42.7.0': ('W-l2-out', _unit),
+    '1-0:62.7.0': ('W-l3-out', _unit),
     '0-1:24.1.0': ('type', _id),
     '0-1:96.1.0': ('id-gas', _id),
     '0-1:24.2.1': ('gas', _gas),
@@ -158,7 +158,7 @@ class Meter():
                 args.append(bit[:-1])
             if not obis in OBIS:
                 self.logger.warning('Unknown data object with OBIS: {0})'
-                                  .format(obis))
+                                    .format(obis))
                 continue
             name, data_func = OBIS[obis]
             data = data_func(*args)

@@ -1,7 +1,9 @@
 __author__ = 'rkuipers'
 import socket
 import logging
+import time
 
+current_time = int(time.time())
 
 class CarbonServer():
 
@@ -12,7 +14,7 @@ class CarbonServer():
 
         self.logger = logging.getLogger(__name__)
 
-    def send_metric(self, path, value, timestamp):
+    def send_metric(self, path, value, timestamp=current_time):
 
         self.logger.debug('Opening Carbon Socket to send metrics')
         sock = socket.socket()
@@ -25,7 +27,7 @@ class CarbonServer():
 
         message = '%s %s %d\n' % (path, value, timestamp)
 
-        self.logger.debug('Carbon Message: {0}').format(message)
+        self.logger.debug('Carbon Message: {0}'.format(message))
 
         sock.sendall(message)
 

@@ -14,7 +14,7 @@ class PvStatus():
         self.logger = logging.getLogger(__name__)
 
     def send_metric(self, kwh_generated, watt_ac_generated, kwh_consumed="",
-                    watt_ac_consumed="", volt_dc="", temp_c=""):
+                    watt_ac_consumed="", volt_dc="", temp_c="", totals=0):
 
         now = datetime.datetime.now()
 
@@ -22,7 +22,7 @@ class PvStatus():
                          'sid': self.sid,                # (PV-)System ID
                          'd': now.strftime('%Y%m%d'),    # date
                          't': now.strftime('%H:%M'),     # time (now)
-                         'c1': 0,
+                         'c1': totals,  # 1 when upload cumulative kwh
                          'v1': kwh_generated,     # total kWh generation today
                          'v2': watt_ac_generated,        # current output power
                          'v3': kwh_consumed,
@@ -32,9 +32,8 @@ class PvStatus():
                         }
 
         encoded_pvoutput_data = urllib.urlencode(pvoutput_data)
-        print encoded_pvoutput_data
-        # self.logger.debug("Sending data to pvoutput.org {0}")\
-        #     .format(encoded_pvoutput_data)
+        self.logger.debug("Sending data to pvoutput.org {0}"\
+            .format(encoded_pvoutput_data))
 
         response = ""
         try:
