@@ -15,6 +15,7 @@ carbon_port = '2003'
 carbon_base_path = 'power.'
 pv_interval = 60
 p1_interval = 10
+simulate = False
 
 # Dirty hack as lighttp does not handle digest correctly.
 # so we are actually doing a replay attack :/
@@ -66,7 +67,7 @@ def thread_get_p1_data():
     global glob_p1_data
 
     logger.info('GETTING Data From DSMR v4 Meter')
-    p1_meter = dsmr4_p1.Meter("/dev/ttyUSB0", debug=3, simulate=True)
+    p1_meter = dsmr4_p1.Meter("/dev/ttyUSB0", simulate=simulate)
     glob_p1_data = p1_meter.get_telegram()
 
     threading.Timer(p1_interval, get_p1_data).start()

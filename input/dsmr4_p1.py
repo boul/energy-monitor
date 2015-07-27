@@ -63,7 +63,7 @@ class Dsmr4Message():
 
 class Meter():
 
-    def __init__(self, device_port, debug=False, simulate=False):
+    def __init__(self, device_port, simulate=False):
 
         self.device_port = device_port
         self.debug = debug
