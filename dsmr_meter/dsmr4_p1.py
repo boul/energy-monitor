@@ -84,6 +84,8 @@ class Meter():
 
             self.logger.debug("Configuring Serial port comms")
 
+            ser.open()
+
             return ser
 
         if self.simulate:
@@ -129,6 +131,8 @@ class Meter():
             raw_lines.append(line)
 
         self.logger.debug("***** P1 Message End ******")
+
+        ser.close()
         # Remove superfluous linebreaks
         lines = []
         for raw_line in raw_lines:
