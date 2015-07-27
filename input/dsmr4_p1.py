@@ -66,7 +66,6 @@ class Meter():
     def __init__(self, device_port, simulate=False):
 
         self.device_port = device_port
-        self.debug = debug
         self.simulate = simulate
 
         self.logger = logging.getLogger(__name__)
