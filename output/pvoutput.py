@@ -13,7 +13,8 @@ class PvStatus():
 
         self.logger = logging.getLogger(__name__)
 
-    def send_metric(self, kwh_generated, watt_ac_generated, kwh_consumed="",
+    def send_metric(self, kwh_generated="", watt_ac_generated="",
+                    kwh_consumed="",
                     watt_ac_consumed="", volt_dc="", temp_c="", totals=0):
 
         now = datetime.datetime.now()
@@ -46,6 +47,8 @@ class PvStatus():
             pass
 
         self.logger.debug(pvoutput_data)
-        self.logger.debug(response.read())
+        self.logger.info(response.read())
 
-        return response.read()
+        result = response.read()
+
+        return result

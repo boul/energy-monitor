@@ -26,19 +26,19 @@ class Vsn300Reader():
 
         try:
             r = requests.get(url, headers=header)
+            parsed_json = json.loads(r.text)
+            path = parsed_json['feeds'][device_path]['datastreams']
+
+            for k, v in path.iteritems():
+
+                # print str(k) + " - " + str(v['description']) + " - " + str(
+                #     v['data'][9]['value'])
+
+                stats[k] = v['data'][9]['value']
+
         except requests.exceptions.RequestException as e:
             self.logger.error(e)
             pass
-
-        parsed_json = json.loads(r.text)
-        path = parsed_json['feeds'][device_path]['datastreams']
-
-        for k, v in path.iteritems():
-
-            # print str(k) + " - " + str(v['description']) + " - " + str(
-            #     v['data'][9]['value'])
-
-            stats[k] = v['data'][9]['value']
 
         self.logger.debug(stats)
 

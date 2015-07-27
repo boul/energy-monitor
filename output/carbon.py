@@ -5,6 +5,7 @@ import time
 
 current_time = int(time.time())
 
+
 class CarbonServer():
 
     def __init__(self, host, port):
