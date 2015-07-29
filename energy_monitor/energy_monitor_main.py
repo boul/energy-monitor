@@ -10,9 +10,42 @@ import datetime
 import time
 import sys
 
+default_cfg = "~/.energy-monitor.cfg"
+
+parser = argparse.ArgumentParser(description="Energy Monitor help")
+parser.add_argument('-c', '--config', nargs='?', const=default_cfg,
+                    help='Config file location')
+parser.add_argument('-d', '--daemon', help='Run as Daemon ',
+                    action="store_true", default=False)
+parser.add_argument('-s', '--simulate', help='Run in simulate mode',
+                    action="store_true", default=False)
+parser.add_argument('--create-config', nargs='?',
+                    const=default_cfg,
+                    help="Create a config file, defaults to "
+                         "~/.energy-monitor.cfg or specify an "
+                         "alternative location",
+                    metavar="path")
+parser.add_argument('-v', '--verbose', help='Verbose logging ',
+                    action="store_true", default=False)
+parser.add_argument('--debug', help='Debug logging ',
+                    action="store_true", default=False)
+# parser.add_argument('-l', '--logfile', help='Send output to logfile  ',
+#                     action="store_true", default=False)
+
+args = parser.parse_args()
+
+print args
+
 # Set logging
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+
+if args.verbose:
+    logger.setLevel(logging.INFO)
+
+elif args.debug:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
@@ -73,8 +106,7 @@ def thread_get_p1_data(config, daemon=False, simulate=False):
     p1_meter = dsmr4_p1.Meter(p1_device, simulate=simulate)
     glob_p1_data = p1_meter.get_telegram()
 
-    print glob_p1_data
-    send_data_to_carbon(config, glob_p1_data, "p1.")
+    #send_data_to_carbon(config, glob_p1_data, "p1.")
 
     if daemon:
         t = threading.Timer(p1_interval, thread_get_p1_data,
@@ -101,7 +133,7 @@ def thread_get_pv_data(config, daemon=False):
 
     if not return_data is None:
         glob_pv_data = return_data
-        send_data_to_carbon(config, return_data, "pv.")
+        #send_data_to_carbon(config, return_data, "pv.")
 
     else:
         glob_pv_data = None
@@ -114,12 +146,11 @@ def thread_get_pv_data(config, daemon=False):
         t.start()
 
 
-def send_data_to_carbon(config, data, type_path):
+def thread_send_to_carbon(interval, config, data_type, daemon=False):
 
     host = config.get('CARBON', 'host')
     port = config.get('CARBON', 'port')
     base_path = config.get('CARBON', 'base_path')
-    current_time = int(time.time())
 
     logger.info('SENDING metrics to Carbon / Graphite')
     logger.debug('host: {0} port: {1} path: {2}'.
@@ -127,10 +158,27 @@ def send_data_to_carbon(config, data, type_path):
 
     server = carbon.CarbonClient(host, int(port))
 
-    for k, v in data.iteritems():
+    if data_type == 'p2' and not glob_p1_data is None:
 
-        path = base_path + type_path + k
-        server.send_metric(path, v, current_time)
+        for k, v in glob_p1_data.iteritems():
+
+            current_time = int(time.time())
+            path = base_path + "p1." + k
+            server.send_metric(path, v, current_time)
+
+    if data_type == 'p1' and not glob_pv_data is None:
+
+        for k, v in glob_pv_data.iteritems():
+
+            current_time = int(time.time())
+            path = base_path + "pv." + k
+            server.send_metric(path, v, current_time)
+
+    if daemon:
+        t = threading.Timer(interval, thread_send_to_carbon,
+                            [interval, config, data_type, daemon])
+        t.daemon = daemon
+        t.start()
 
 
 def thread_send_data_to_pvoutput(config, daemon=False):
@@ -256,6 +304,7 @@ def write_config(path):
     config.set('PVOUTPUT', 'interval', '300')
 
     config.add_section('CARBON')
+    config.set('CARBON', 'enable', 'true')
     config.set('CARBON', 'host', 'host.tld')
     config.set('CARBON', 'port', '2003')
     config.set('CARBON', 'base_path', 'power.')
@@ -293,25 +342,6 @@ def read_config(path):
 
 def main():
 
-    default_cfg = "~/.energy-monitor.cfg"
-
-    parser = argparse.ArgumentParser(description="Energy Monitor help")
-    parser.add_argument('-c', '--config', nargs='?', const=default_cfg,
-                        help='Config file location')
-    parser.add_argument('-l', '--level', help='Log Level, eg: INFO/DEBUG')
-    parser.add_argument('-d', '--daemon', help='Run as Daemon ',
-                        action="store_true", default=False)
-    parser.add_argument('-s', '--simulate', help='Run in simulate mode',
-                        action="store_true", default=False)
-    parser.add_argument('--create-config', nargs='?',
-                        const=default_cfg,
-                        help="Create a config file, defaults to "
-                             "~/.energy-monitor.cfg or specify an "
-                             "alternative location",
-                        metavar="path")
-
-    args = parser.parse_args()
-
     if args.create_config:
         write_config(args.create_config)
         exit()
@@ -323,28 +353,36 @@ def main():
 
     path = os.path.expanduser(path)
 
-    print path
-
     config = read_config(path)
-
     pv_enable = config.getboolean('VSN300', 'enable')
+    pv_interval = config.getint('VSN300', 'interval')
     p1_enable = config.getboolean('P1', 'enable')
+    p1_interval = config.getint('P1', 'interval')
     pvoutput_enable = config.getboolean('PVOUTPUT', 'enable')
+    carbon_enable = config.get('CARBON', 'enable')
 
     if p1_enable:
 
-            logger.info("Getting P1 data Timer thread starting...")
+            logger.info("STARTING P1 data Timer thread starting...")
             thread_get_p1_data(config, args.daemon, args.simulate)
 
     if pv_enable:
 
-        logger.info("Getting PV/VSN300 data Timer thread starting...")
+        logger.info("STARTING PV/VSN300 data Timer thread")
         thread_get_pv_data(config, args.daemon)
 
     if pvoutput_enable:
 
-        logger.info("Sending PV Output data Timer Thread Starting")
+        logger.info("STARTING PV Output data Timer Thread")
         thread_send_data_to_pvoutput(config, args.daemon)
+
+    if carbon_enable:
+
+        logger.info("STARTING P1 metrics to CarbonTimer Thread")
+        thread_send_to_carbon(p1_interval, config, 'p1', args.daemon)
+
+        logger.info("STARTING PV metrics to CarbonTimer Thread")
+        thread_send_to_carbon(pv_interval, config, 'pv', args.daemon)
 
     if args.daemon:
 
@@ -358,5 +396,5 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         # quit
-        print "Ctrl-c received!... exiting"
+        print "...Ctrl-C received!... exiting"
         sys.exit()

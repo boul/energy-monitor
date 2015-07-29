@@ -94,7 +94,7 @@ class Meter():
 
         if self.simulate:
 
-            self.logger.info("SIMULATION!!! "
+            self.logger.warning("SIMULATION!!! "
                              "Opening a file to simulate serial output")
 
             ser = open("p1.raw", 'rb')
@@ -111,7 +111,7 @@ class Meter():
         while True:
             line = ser.readline().strip().strip('\0')
             if not line.startswith('/'):
-                self.logger.warning('skipping line: {0}'.format(line))
+                self.logger.debug('skipping line: {0}'.format(line))
                 continue
             break
 
