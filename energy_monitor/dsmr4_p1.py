@@ -11,12 +11,13 @@ _gas = lambda tst, m3: (_tst(tst), _unit(m3))
 _unit = lambda x: float(x.split('*', 1)[0])
 _tariff = lambda x: 'low' if x == '0002' else ('high' if x == '0001' else x)
 _id = lambda x: x
+_blackhole = lambda x: None
 
 module_logger = logging.getLogger(__name__)
 
 
 OBIS = {
-    '0-0:96.1.1': ('serial_id', _id),
+    '0-0:96.1.1': ('serial_id', _blackhole),
     '0-0:1.0.0': ('timestamp', _tst),
     '1-3:0.2.8': ('DSMR', _id),
     '1-0:1.8.1': ('kWh-high', _unit),
@@ -24,12 +25,12 @@ OBIS = {
     '1-0:2.8.1': ('kWh-out-high', _unit),
     '1-0:2.8.2': ('kWh-out-low', _unit),
     '0-0:17.0.0': ('kWh-limit', _unit),
-    '0-0:96.14.0': ('tariff', _tariff),
+    '0-0:96.14.0': ('tariff', _unit),
     '1-0:1.7.0': ('W-in', _unit),
     '1-0:2.7.0': ('W-out', _unit),
     '0-0:96.3.10': ('switch', _id),
     '0-0:96.13.1': ('msg-numeric', _id),
-    '0-0:96.13.0': ('msg-txt', _id),
+    '0-0:96.13.0': ('msg-txt', _blackhole),
     '0-0:96.7.21': ('failures', _id),
     '0-0:96.7.9': ('extended-failures', _id),
     '1-0:32.32.0': ('V-sags-l1', _id),
@@ -48,7 +49,7 @@ OBIS = {
     '1-0:42.7.0': ('W-l2-out', _unit),
     '1-0:62.7.0': ('W-l3-out', _unit),
     '0-1:24.1.0': ('type', _id),
-    '0-1:96.1.0': ('id-gas', _id),
+    '0-1:96.1.0': ('id-gas', _blackhole),
     '0-1:24.2.1': ('gas', _gas),
     '0-1:24.4.0': ('gas-switch', _id),
     }
@@ -93,7 +94,8 @@ class Meter():
 
         if self.simulate:
 
-            self.logger.info("Opening a file to simulate serial output")
+            self.logger.info("SIMULATION!!! "
+                             "Opening a file to simulate serial output")
 
             ser = open("p1.raw", 'rb')
 
@@ -115,8 +117,8 @@ class Meter():
 
         if not len(line) >= 5:
             self.logger.error("P1 Message Header line too short")
-        telegram['header-marker'] = line[0:6]
-        telegram['header-id'] = line[6:]
+        #telegram['header-marker'] = line[0:6]
+        #telegram['header-id'] = line[6:]
 
         # Read second (blank) line
         if ser.readline().strip() != '':
@@ -154,7 +156,7 @@ class Meter():
                     self.logger.error('Malformed argument')
                 args.append(bit[:-1])
             if not obis in OBIS:
-                self.logger.warning('Unknown data object with OBIS: {0})'
+                self.logger.debug('Unknown data object with OBIS: {0})'
                                     .format(obis))
                 continue
             name, data_func = OBIS[obis]

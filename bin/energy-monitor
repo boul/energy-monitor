@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+import energy_monitor.energy_monitor_main
+__author__ = 'rkuipers'
+
+
+energy_monitor.energy_monitor_main.main()
+

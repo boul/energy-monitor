@@ -64,7 +64,7 @@ class Vsn300Reader():
         try:
             opener = urllib2.build_opener(handler)
             urllib2.install_opener(opener)
-            json_response = urllib2.urlopen(url)
+            json_response = urllib2.urlopen(url, timeout=6)
             parsed_json = json.load(json_response)
             path = parsed_json['feeds'][device_path]['datastreams']
 
@@ -77,7 +77,8 @@ class Vsn300Reader():
 
         except (urllib2.HTTPError, urllib2.URLError) as e:
             self.logger.error(e)
-            pass
+
+            return None
 
         self.logger.debug(stats)
 

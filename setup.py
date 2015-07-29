@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='energy_monitor',
@@ -9,5 +9,7 @@ setup(
     author='Roeland Kuipers',
     author_email='roeland@boul.nl',
     description='Monitors DSMR4 P1 Smart Meter and ABB VSN300 PV logger'
-                ' and sends stats to e.g. pvoutput.org'
+                ' and sends stats to e.g. pvoutput.org',
+    scripts=['bin/energy-monitor'],
+    install_requires=['PySerial']
 )

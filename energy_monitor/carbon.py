@@ -18,7 +18,8 @@ class CarbonClient():
     def send_metric(self, path, value, timestamp=current_time):
 
         self.logger.debug('Opening Carbon Socket to send metrics')
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock = socket.socket()
         sock.settimeout(10)
 
         try:

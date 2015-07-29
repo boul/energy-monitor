@@ -1,5 +1,5 @@
 __author__ = 'rkuipers'
 
-from .energy_monitor import main
+from .energy_monitor_main import main
 
 main()
