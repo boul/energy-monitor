@@ -158,23 +158,25 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
     server = carbon.CarbonClient(host, int(port))
 
     if data_type == 'p1' and 'glob_p1_data' in globals():
+        if glob_p1_data is not None:
 
-        for k, v in glob_p1_data.iteritems():
+            for k, v in glob_p1_data.iteritems():
 
-            current_time = int(time.time())
-            path = base_path + "p1." + k
-            server.send_metric(path, v, current_time)
+                current_time = int(time.time())
+                path = base_path + "p1." + k
+                server.send_metric(path, v, current_time)
     else:
 
         logger.error("No P1 data found")
 
     if data_type == 'pv' and 'glob_pv_data' in globals():
+        if glob_pv_data is not None:
 
-        for k, v in glob_pv_data.iteritems():
+            for k, v in glob_pv_data.iteritems():
 
-            current_time = int(time.time())
-            path = base_path + "pv." + k
-            server.send_metric(path, v, current_time)
+                current_time = int(time.time())
+                path = base_path + "pv." + k
+                server.send_metric(path, v, current_time)
 
     if daemon:
         t = threading.Timer(interval, thread_send_to_carbon,
@@ -204,39 +206,40 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     pv_connection = pvoutput.Connection(api_key, system_id)
 
     if 'glob_pv_data' in globals():
+        if glob_pv_data is not None:
 
+            if 'm101_1_W' in glob_pv_data:
+                watt_generated = float(glob_pv_data['m101_1_W']) * 1000
+            else:
+                watt_generated = None
 
-        if 'm101_1_W' in glob_pv_data:
-            watt_generated = float(glob_pv_data['m101_1_W']) * 1000
-        else:
-            watt_generated = None
+            if 'm64061_1_TotalWH' in glob_pv_data:
+                total_wh_generated = float(glob_pv_data['m64061_1_TotalWH']) * 1000
+            else:
+                total_wh_generated = None
 
-        if 'm64061_1_TotalWH' in glob_pv_data:
-            total_wh_generated = float(glob_pv_data['m64061_1_TotalWH']) * 1000
-        else:
-            total_wh_generated = None
-
-        if 'm101_1_DCV' in glob_pv_data:
-            vdc = glob_pv_data['m101_1_DCV']
-        else:
-            vdc = None
+            if 'm101_1_DCV' in glob_pv_data:
+                vdc = glob_pv_data['m101_1_DCV']
+            else:
+                vdc = None
 
     else:
 
         logger.warning('No PV Data! Sun down? or Logger Down?')
 
     if 'glob_p1_data' in globals():
+        if glob_p1_data is not None:
 
-        if 'W-in' in glob_p1_data:
-            watt_import = float(glob_p1_data['W-in']) * 1000
-        else:
-            watt_import = None
+            if 'W-in' in glob_p1_data:
+                watt_import = float(glob_p1_data['W-in']) * 1000
+            else:
+                watt_import = None
 
-        if 'kWh-high' in glob_p1_data:
-            total_wh_import = float(glob_p1_data['kWh-high'] +
-                                    glob_p1_data['kWh-low']) * 1000
-        else:
-            total_wh_import = None
+            if 'kWh-high' in glob_p1_data:
+                total_wh_import = float(glob_p1_data['kWh-high'] +
+                                        glob_p1_data['kWh-low']) * 1000
+            else:
+                total_wh_import = None
 
     else:
         logger.error('No P1 Data! Problem with serial connection?')
@@ -246,9 +249,9 @@ def thread_send_data_to_pvoutput(config, daemon=False):
         return
 
     if 'glob_weather_data' in globals():
+        if glob_weather_data is not None:
 
-        temp_c = glob_weather_data['current_observation']['temp_c']
-        print temp_c
+            temp_c = glob_weather_data['current_observation']['temp_c']
 
     logger.debug("PVOUTPUT add_status: date: {0} time: {1} wh_gen: {2} "
                  "watt-gen: {3} wh_import {4} watt_import: {5} temp: {6} "

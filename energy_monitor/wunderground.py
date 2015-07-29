@@ -48,8 +48,6 @@ class Connection():
 
             return parsed_json
 
-
-
         except (urllib2.HTTPError, urllib2.URLError) as e:
             self.logger.error(e)
 
