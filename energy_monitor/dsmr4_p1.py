@@ -164,6 +164,8 @@ class Meter():
 
             telegram[name] = data
 
+        telegram['gas-m3'] = telegram['gas'][1]
+
         self.logger.debug("***** Processed Message Start *****")
         self.logger.debug(telegram)
         self.logger.debug("\n***** Processed Message End *****")
