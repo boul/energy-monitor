@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='energy_monitor',
-    version='0.7',
+    version='0.9',
     packages=['energy_monitor'],
     url='github.com/boul/energy-monitor',
     license='Apache2',

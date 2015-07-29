@@ -165,9 +165,6 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
                 current_time = int(time.time())
                 path = base_path + "p1." + k
                 server.send_metric(path, v, current_time)
-    else:
-
-        logger.error("No P1 data found")
 
     if data_type == 'pv' and 'glob_pv_data' in globals():
         if glob_pv_data is not None:
