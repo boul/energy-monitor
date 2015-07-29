@@ -34,7 +34,7 @@ parser.add_argument('--debug', help='Debug logging ',
 #                     action="store_true", default=False)
 
 args = parser.parse_args()
-print args
+
 # Set logging
 logger = logging.getLogger()
 
