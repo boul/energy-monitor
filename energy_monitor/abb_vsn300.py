@@ -73,7 +73,7 @@ class Vsn300Reader():
                 # print str(k) + " - " + str(v['description']) + " - " + str(
                 #     v['data'][9]['value'])
 
-                stats[k] = v['data'][9]['value']
+                stats[k] = v['data'][0]['value']
 
         except (urllib2.HTTPError, urllib2.URLError) as e:
             self.logger.error(e)

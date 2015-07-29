@@ -1,11 +1,11 @@
-[ABB-VSN300]
+[VSN300]
 # enable: turn data retrieval on or off
 # hostname:  or ip of the logger
-# inverter_serial: serial can be found in the webui: data -> system info -> inverter info -> serial 
-# interval: interval to read data from logger, logger does only refresh data every 60 seconds, polling more often is useless 
+# inverter_serial: serial can be found in the webui: data -> system info -> inverter info -> serial
+# interval: interval to read data from logger, logger does only refresh data every 60 seconds, polling more often is useless
 # username: is either guest or admin
 # password: as set on webui
-# 
+#
 enable = true
 host = 192.168.1.12
 inverter_serial = XXXXXX-XXXX-XXXX
@@ -16,15 +16,16 @@ password = password
 [P1]
 enable = true
 p1_device = /dev/ttyUSB0
+interval = 10
 
 [PVOUTPUT]
 enable = true
-api_key = 
-system_id = 
-interval = 
+api_key =
+system_id =
+interval = 300
 
 [CARBON]
+enable = true
 host = host.tld
 port = 2003
 base_path = power.
-
