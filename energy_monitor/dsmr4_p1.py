@@ -26,8 +26,8 @@ OBIS = {
     '1-0:2.8.2': ('kWh-out-low', _unit),
     '0-0:17.0.0': ('kWh-limit', _unit),
     '0-0:96.14.0': ('tariff', _unit),
-    '1-0:1.7.0': ('W-in', _unit),
-    '1-0:2.7.0': ('W-out', _unit),
+    '1-0:1.7.0': ('kW-in', _unit),
+    '1-0:2.7.0': ('kW-out', _unit),
     '0-0:96.3.10': ('switch', _id),
     '0-0:96.13.1': ('msg-numeric', _id),
     '0-0:96.13.0': ('msg-txt', _blackhole),
@@ -42,24 +42,17 @@ OBIS = {
     '1-0:31.7.0': ('A-l1', _unit),
     '1-0:51.7.0': ('A-l2', _unit),
     '1-0:71.7.0': ('A-l3', _unit),
-    '1-0:21.7.0': ('W-l1-in', _unit),
-    '1-0:41.7.0': ('W-l2-in', _unit),
-    '1-0:61.7.0': ('W-l3-in', _unit),
-    '1-0:22.7.0': ('W-l1-out', _unit),
-    '1-0:42.7.0': ('W-l2-out', _unit),
-    '1-0:62.7.0': ('W-l3-out', _unit),
+    '1-0:21.7.0': ('kW-l1-in', _unit),
+    '1-0:41.7.0': ('kW-l2-in', _unit),
+    '1-0:61.7.0': ('kW-l3-in', _unit),
+    '1-0:22.7.0': ('kW-l1-out', _unit),
+    '1-0:42.7.0': ('kW-l2-out', _unit),
+    '1-0:62.7.0': ('kW-l3-out', _unit),
     '0-1:24.1.0': ('type', _id),
     '0-1:96.1.0': ('id-gas', _blackhole),
     '0-1:24.2.1': ('gas', _gas),
     '0-1:24.4.0': ('gas-switch', _id),
     }
-
-
-class Dsmr4Message():
-
-    def __init__(self,  **kwargs):
-
-        self.serial_id = kwargs.get(['serial_id'], None)
 
 
 class Meter():

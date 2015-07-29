@@ -9,6 +9,7 @@ import os
 import datetime
 import time
 import sys
+import wunderground
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -33,9 +34,7 @@ parser.add_argument('--debug', help='Debug logging ',
 #                     action="store_true", default=False)
 
 args = parser.parse_args()
-
 print args
-
 # Set logging
 logger = logging.getLogger()
 
@@ -158,15 +157,18 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
 
     server = carbon.CarbonClient(host, int(port))
 
-    if data_type == 'p2' and not glob_p1_data is None:
+    if data_type == 'p1' and 'glob_p1_data' in globals():
 
         for k, v in glob_p1_data.iteritems():
 
             current_time = int(time.time())
             path = base_path + "p1." + k
             server.send_metric(path, v, current_time)
+    else:
 
-    if data_type == 'p1' and not glob_pv_data is None:
+        logger.error("No P1 data found")
+
+    if data_type == 'pv' and 'glob_pv_data' in globals():
 
         for k, v in glob_pv_data.iteritems():
 
@@ -201,7 +203,8 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
 
-    if glob_pv_data is not None:
+    if 'glob_pv_data' in globals():
+
 
         if 'm101_1_W' in glob_pv_data:
             watt_generated = float(glob_pv_data['m101_1_W']) * 1000
@@ -222,7 +225,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
         logger.warning('No PV Data! Sun down? or Logger Down?')
 
-    if glob_p1_data is not None:
+    if 'glob_p1_data' in globals():
 
         if 'W-in' in glob_p1_data:
             watt_import = float(glob_p1_data['W-in']) * 1000
@@ -241,6 +244,11 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     if (glob_p1_data, glob_p1_data) is None:
         logger.critial('No PV & P1 Data... returning...')
         return
+
+    if 'glob_weather_data' in globals():
+
+        temp_c = glob_weather_data['current_observation']['temp_c']
+        print temp_c
 
     logger.debug("PVOUTPUT add_status: date: {0} time: {1} wh_gen: {2} "
                  "watt-gen: {3} wh_import {4} watt_import: {5} temp: {6} "
@@ -264,6 +272,28 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                             [config, daemon])
         t.daemon = daemon
         t.start()
+
+def thread_get_weather(config, daemon):
+
+    global glob_weather_data
+
+    api_key = config.get('WUNDERGROUND', 'api_key')
+    iso_country = config.get('WUNDERGROUND', 'iso_country')
+    city = config.get('WUNDERGROUND', 'city')
+    interval = config.getint('WUNDERGROUND', 'interval')
+
+    connection = wunderground.Connection(api_key, iso_country, city)
+
+    data = connection.get_weather()
+
+    glob_weather_data = connection.get_weather()
+
+    if daemon:
+        t = threading.Timer(interval, thread_get_weather,
+                            [config, daemon])
+        t.daemon = daemon
+        t.start()
+
 
 
 def write_config(path):
@@ -308,6 +338,13 @@ def write_config(path):
     config.set('CARBON', 'host', 'host.tld')
     config.set('CARBON', 'port', '2003')
     config.set('CARBON', 'base_path', 'power.')
+
+    config.add_section('WUNDERGROUND')
+    config.set('WUNDERGROUND', 'enable', 'true')
+    config.set('WUNDERGROUND', 'api_key', '')
+    config.set('WUNDERGROUND', 'iso_country', 'NL')
+    config.set('WUNDERGROUND', 'city', 'de_bilt')
+    config.set('WUNDERGROUND', 'interval', '300')
 
     path = os.path.expanduser(path)
 
@@ -360,6 +397,7 @@ def main():
     p1_interval = config.getint('P1', 'interval')
     pvoutput_enable = config.getboolean('PVOUTPUT', 'enable')
     carbon_enable = config.get('CARBON', 'enable')
+    wunderground_enable = config.get('WUNDERGROUND', 'enable')
 
     if p1_enable:
 
@@ -370,6 +408,11 @@ def main():
 
         logger.info("STARTING PV/VSN300 data Timer thread")
         thread_get_pv_data(config, args.daemon)
+
+    if wunderground_enable:
+
+        logger.info("STARTING Wunderground Weather data Timer Thread")
+        thread_get_weather(config, args.daemon)
 
     if pvoutput_enable:
 
