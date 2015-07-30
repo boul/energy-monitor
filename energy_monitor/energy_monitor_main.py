@@ -191,15 +191,12 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     now = datetime.datetime.now()
     date_now = now.strftime('%Y%m%d')
     time_now = now.strftime('%H:%M')
-    total_wh_generated = None
+    day_wh_generated = None
     watt_generated = None
     total_wh_import = None
-    watt_import = None
     watt_net = None
     temp_c = None
     vdc = None
-    cum = 1
-
 
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
@@ -212,10 +209,10 @@ def thread_send_data_to_pvoutput(config, daemon=False):
             else:
                 watt_generated = None
 
-            if 'm64061_1_TotalWH' in glob_pv_data:
-                total_wh_generated = float(glob_pv_data['m64061_1_TotalWH']) * 1000
+            if 'm64061_1_DayWH' in glob_pv_data:
+                day_wh_generated = float(glob_pv_data['m64061_1_DayWH']) * 1000
             else:
-                total_wh_generated = None
+                day_wh_generated = None
 
             if 'm101_1_DCV' in glob_pv_data:
                 vdc = glob_pv_data['m101_1_DCV']
@@ -275,28 +272,28 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     # See also: http://pvoutput.org/help.html#api-addstatus (net data)
     # we need to send gross before net so they will be merged correctly
 
-    logger.info("Sending gross generation data to pvoutput")
+    logger.info("Sending (gross) generation data to pvoutput")
     pv_connection.add_status(date_now,
                              time_now,
-                             total_wh_generated,
+                             day_wh_generated,
                              watt_generated,
                              None,
                              None,
                              temp_c,
                              vdc,
-                             cum,
+                             cumulative=True,
                              net=False)
 
-    logger.info("Sending net import data to pvoutput")
+    logger.info("Sending (net) import data to pvoutput")
     pv_connection.add_status(date_now,
                              time_now,
                              None,
                              None,
                              total_wh_import,
                              watt_net,
-                             temp_c,
-                             vdc,
-                             cum,
+                             None,
+                             None,
+                             cumulative=False,
                              net=True)
 
     if daemon:
