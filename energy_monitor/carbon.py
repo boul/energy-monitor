@@ -33,4 +33,3 @@ class CarbonClient():
         except (socket.error, socket.gaierror) as e:
             self.logger.error(e)
             pass
-

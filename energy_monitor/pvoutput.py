@@ -97,14 +97,12 @@ class Connection():
         if net:
             params['n'] = 1
 
-        for k,v in params.iteritems():
-            self.logger.info("Using key: {0} with value: {1}".format(k,v))
+        for k, v in params.iteritems():
+            self.logger.info("Using key: {0} with value: {1}".format(k, v))
 
         params = urllib.urlencode(params)
 
         self.logger.debug(params)
-
-
 
         response = self.make_request('POST', path, params)
 
@@ -165,4 +163,3 @@ class Connection():
         conn.request(method, path, params, headers)
 
         return conn.getresponse()
-

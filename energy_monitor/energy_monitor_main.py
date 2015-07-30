@@ -106,7 +106,7 @@ def thread_get_p1_data(config, daemon=False, simulate=False):
     glob_p1_data = p1_meter.get_telegram()
 
     for k, v in glob_p1_data.iteritems():
-        logger.info("P1 DATA: key: {0} - value: {1}".format(k,v))
+        logger.info("P1 DATA: key: {0} - value: {1}".format(k, v))
 
     if daemon:
         t = threading.Timer(p1_interval, thread_get_p1_data,
@@ -192,21 +192,22 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     now = datetime.datetime.now()
     date_now = now.strftime('%Y%m%d')
     time_now = now.strftime('%H:%M')
-    # day_wh_generated = None
-    # watt_generated = None
-    # total_wh_import = None
-    # total_wh_export = None
-    # kwh_out_high = None
-    # kwh_out_low = None
-    # kwh_high = None
-    # kwh_low = None
-    # watt_export = None
-    # watt_import = None
-    # temp_c = None
-    # vdc = None
-    # gas_m3 = None
-    # inverter_temp = None
-    # watt_net = None
+    #day_wh_generated = None
+    total_wh_generated = None
+    watt_generated = None
+    total_wh_import = None
+    #total_wh_export = None
+    kwh_out_high = None
+    kwh_out_low = None
+    kwh_high = None
+    kwh_low = None
+    watt_export = None
+    watt_import = None
+    temp_c = None
+    vdc = None
+    gas_m3 = None
+    inverter_temp = None
+    watt_net = None
 
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
@@ -214,28 +215,29 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     if 'glob_pv_data' in globals():
         if glob_pv_data is not None:
 
-            watt_generated = None
+            #watt_generated = None
             if 'm101_1_W' in glob_pv_data:
                 watt_generated = float(glob_pv_data['m101_1_W']) * 1000
                 logger.info('Watt generated: {0}'.format(watt_generated))
 
-            day_wh_generated = None
+            # day_wh_generated = None
             if 'm64061_1_DayWH' in glob_pv_data:
                 day_wh_generated = float(glob_pv_data['m64061_1_DayWH']) * 1000
                 logger.info('Day wH generated: {0}'.format(day_wh_generated))
 
-            total_wh_generated = None
+            # total_wh_generated = None
             if 'm64061_1_TotalWH' in glob_pv_data:
-                total_wh_generated = float(glob_pv_data['m64061_1_TotalWH']) * 1000
+                total_wh_generated = float(glob_pv_data[
+                    'm64061_1_TotalWH']) * 1000
                 logger.info('Total (Lifetime) wH generated: {0}'
                             .format(total_wh_generated))
 
-            vdc = None
+            # vdc = None
             if 'm101_1_DCV' in glob_pv_data:
                 vdc = glob_pv_data['m101_1_DCV']
                 logger.info('Volt DC: {0}'.format(vdc))
 
-            inverter_temp = None
+            # inverter_temp = None
             if 'm101_1_TmpCab' in glob_pv_data:
                 inverter_temp = glob_pv_data['m101_1_TmpCab']
                 logger.info('Inverter Temperature: {0}'.format(inverter_temp))
@@ -247,24 +249,24 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     if 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
-            watt_import = None
+            # watt_import = None
             if 'kW-in' in glob_p1_data:
                 watt_import = float(glob_p1_data['kW-in']) * 1000
 
                 logger.info('Total kW Import: {0}'.format(watt_import))
 
-            watt_export = None
+            # watt_export = None
             if 'kW-out' in glob_p1_data:
                 watt_export = float(glob_p1_data['kW-out']) * 1000
 
                 logger.info('Total kW Export: {0}'.format(watt_export))
 
-            gas_m3 = None
+            # gas_m3 = None
             if 'gas-m3' in glob_p1_data:
                 gas_m3 = float(glob_p1_data['gas-m3'])
                 logger.info('Total gas M3: {0}'.format(gas_m3))
 
-            total_wh_import = None
+            # total_wh_import = None
             if ('kWh-high' and 'kWh-low') in glob_p1_data:
 
                 kwh_low = glob_p1_data['kWh-low'] * 1000
@@ -274,7 +276,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
                 logger.info('Total Wh Import: {0}'.format(total_wh_import))
 
-            total_wh_export = None
+            # total_wh_export = None
             if ('kWh-out-high' and 'kWh-out-low') in glob_p1_data:
                 kwh_out_low = glob_p1_data['kWh-out-low'] * 1000
                 kwh_out_high = glob_p1_data['kWh-out-high'] * 1000
@@ -296,7 +298,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
         logger.critial('No PV & P1 Data... returning...')
         return
 
-    temp_c = None
+    # temp_c = None
     if 'glob_weather_data' in globals():
         if glob_weather_data is not None:
 
@@ -361,7 +363,6 @@ def thread_get_weather(config, daemon):
                             [config, daemon])
         t.daemon = daemon
         t.start()
-
 
 
 def write_config(path):

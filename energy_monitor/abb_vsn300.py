@@ -28,8 +28,9 @@ class MyHTTPDigestAuthHandler(urllib2.HTTPDigestAuthHandler):
             # prompting for the information. Crap. This isn't great
             # but it's better than the current 'repeat until recursion
             # depth exceeded' approach <wink>
-            raise urllib2.HTTPError(req.get_full_url(), 401, "digest auth failed",
-                            headers, None)
+            raise urllib2.HTTPError(req.get_full_url(), 401,
+                                    "digest auth failed",
+                                    headers, None)
         else:
             self.retried += 1
         if authreq:
@@ -80,12 +81,12 @@ class Vsn300Reader():
 
         for k, v in path.iteritems():
 
-                self.logger.info(str(k) + " - " + str(v['description']) + " - " +
-                            str(v['data'][9]['value']))
+                self.logger.info(
+                    str(k) + " - " + str(v['description']) + " - " +
+                    str(v['data'][9]['value']))
 
                 stats[k] = v['data'][9]['value']
 
         self.logger.debug(stats)
 
         return stats
-
