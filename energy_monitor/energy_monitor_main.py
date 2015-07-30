@@ -236,18 +236,24 @@ def thread_send_data_to_pvoutput(config, daemon=False):
             else:
                 watt_export = None
 
-            # Calculate netto power import (neg is export)
-            if (watt_import, watt_export) is not None:
-                watt_net = float(watt_import) - float(watt_export)
+            # # Calculate netto power import (neg is export)
+            # if (watt_import, watt_export) is not None:
+            #     watt_net = float(watt_import) - float(watt_export)
+            #
+            # else:
+            #     watt_net = None
 
-            else:
-                watt_net = None
-
-            if 'kWh-high' in glob_p1_data:
+            if ('kWh-high', 'kWh-low') in glob_p1_data:
                 total_wh_import = float(glob_p1_data['kWh-high'] +
                                         glob_p1_data['kWh-low']) * 1000
             else:
                 total_wh_import = None
+
+            if ('kWh-out-high', 'kWh-out-low') in glob_p1_data:
+                total_wh_export = float(glob_p1_data['kWh-out-high'] +
+                                        glob_p1_data['kWh-out-low']) * 1000
+            else:
+                total_wh_export = None
 
     else:
         logger.error('No P1 Data! Problem with serial connection?')
@@ -265,7 +271,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     # See also: http://pvoutput.org/help.html#api-addstatus (net data)
     # we need to send gross before net so they will be merged correctly
 
-    logger.info("Sending (gross) generation data to pvoutput")
+    logger.info("Sending (gross) pv generation data to pvoutput")
     pv_connection.add_status(date_now,
                              time_now,
                              day_wh_generated,
@@ -277,13 +283,13 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              cumulative=True,
                              net=False)
 
-    logger.info("Sending (net) import data to pvoutput")
+    logger.info("Sending (net) import/export data to pvoutput")
     pv_connection.add_status(date_now,
                              time_now,
-                             None,
-                             None,
+                             total_wh_export,
+                             watt_export,
                              total_wh_import,
-                             watt_net,
+                             watt_import,
                              None,
                              None,
                              cumulative=False,
