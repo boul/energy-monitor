@@ -55,20 +55,12 @@ class Connection():
 
     def add_status(self, date, time, energy_exp=None, power_exp=None,
                    energy_imp=None, power_imp=None, temp=None, vdc=None,
-                   cumulative=False, net=False):
+                   cumulative=False, net=False, v7=None, v8=None, v9=None,
+                   v10=None, v11=None, v12=None):
         """
         Uploads live output data
 
         """
-
-        self.logger.debug("PVOUTPUT add_status: date: {0} time: {1}"
-                          " energy_exp: {2}"
-                          " power_exp: {3} energy_import {4} power_exp: {5}"
-                          " temp: {6} "
-                          "vdc: {7} cum: {8}, net{9}".
-                          format(date, time, energy_exp, power_exp,
-                                 energy_imp, power_imp, temp,
-                                 vdc, cumulative, net))
 
         path = '/service/r2/addstatus.jsp'
         params = {
@@ -78,21 +70,41 @@ class Connection():
 
         if energy_exp:
             params['v1'] = energy_exp
-        if power_exp:
+        if power_exp >= 0.0:
             params['v2'] = power_exp
         if energy_imp:
             params['v3'] = energy_imp
-        if power_imp:
+        if power_imp >= 0.0:
             params['v4'] = power_imp
         if temp:
             params['v5'] = temp
         if vdc:
             params['v6'] = vdc
+        if v7:
+            params['v7'] = v7
+        if v8:
+            params['v8'] = v8
+        if v9:
+            params['v9'] = v9
+        if v10:
+            params['v10'] = v10
+        if v11:
+            params['v11'] = v11
+        if v12:
+            params['v12'] = v12
         if cumulative:
             params['c1'] = 1
         if net:
             params['n'] = 1
+
+        for k,v in params.iteritems():
+            self.logger.info("Using key: {0} with value: {1}".format(k,v))
+
         params = urllib.urlencode(params)
+
+        self.logger.debug(params)
+
+
 
         response = self.make_request('POST', path, params)
 

@@ -40,13 +40,14 @@ class MyHTTPDigestAuthHandler(urllib2.HTTPDigestAuthHandler):
 
 class Vsn300Reader():
 
-    def __init__(self, host, user, password, inverter_id):
+    def __init__(self, host, user, password, inverter_id, simulate=False):
         
         self.host = host
         self.user = user
         self.password = password
         self.realm = 'registered_user@power-one.com'
         self.inverter_id = inverter_id
+        self.simulate = simulate
 
         self.logger = logging.getLogger(__name__)
 
@@ -59,26 +60,30 @@ class Vsn300Reader():
         device_path = "ser4:" + self.inverter_id
         stats = dict()
 
-        self.logger.info("Getting statistics from URL: {0}".format(url))
+        self.logger.info("Getting VSN300 stats from: {0}".format(url))
 
-        try:
-            opener = urllib2.build_opener(handler)
-            urllib2.install_opener(opener)
-            json_response = urllib2.urlopen(url, timeout=10)
-            parsed_json = json.load(json_response)
-            path = parsed_json['feeds'][device_path]['datastreams']
+        if self.simulate:
+            self.logger.warning("RUNNING IN SIMULATION MODE!!!")
+            parsed_json = json.loads(open('vsn300.json').read())
+        else:
 
-            for k, v in path.iteritems():
+            try:
+                opener = urllib2.build_opener(handler)
+                urllib2.install_opener(opener)
+                json_response = urllib2.urlopen(url, timeout=10)
+                parsed_json = json.load(json_response)
+            except (urllib2.HTTPError, urllib2.URLError) as e:
+                self.logger.error(e)
+                return
 
-                # print str(k) + " - " + str(v['description']) + " - " + str(
-                #     v['data'][9]['value'])
+        path = parsed_json['feeds'][device_path]['datastreams']
+
+        for k, v in path.iteritems():
+
+                self.logger.info(str(k) + " - " + str(v['description']) + " - " +
+                            str(v['data'][9]['value']))
 
                 stats[k] = v['data'][9]['value']
-
-        except (urllib2.HTTPError, urllib2.URLError) as e:
-            self.logger.error(e)
-
-            return None
 
         self.logger.debug(stats)
 
