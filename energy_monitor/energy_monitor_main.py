@@ -313,8 +313,6 @@ def thread_get_weather(config, daemon):
 
     connection = wunderground.Connection(api_key, iso_country, city)
 
-    data = connection.get_weather()
-
     glob_weather_data = connection.get_weather()
 
     if daemon:
