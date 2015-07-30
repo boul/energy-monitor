@@ -55,10 +55,21 @@ class Connection():
 
     def add_status(self, date, time, energy_exp=None, power_exp=None,
                    energy_imp=None, power_imp=None, temp=None, vdc=None,
-                   cumulative=False):
+                   cumulative=False, net=False):
         """
         Uploads live output data
+
         """
+
+        self.logger.debug("PVOUTPUT add_status: date: {0} time: {1}"
+                          " energy_exp: {2}"
+                          " power_exp: {3} energy_import {4} power_exp: {5}"
+                          " temp: {6} "
+                          "vdc: {7} cum: {8}, net{9}".
+                          format(date, time, energy_exp, power_exp,
+                                 energy_imp, power_imp, temp,
+                                 vdc, cumulative, net))
+
         path = '/service/r2/addstatus.jsp'
         params = {
             'd': date,
@@ -79,6 +90,8 @@ class Connection():
             params['v6'] = vdc
         if cumulative:
             params['c1'] = 1
+        if net:
+            params['n'] = 1
         params = urllib.urlencode(params)
 
         response = self.make_request('POST', path, params)
