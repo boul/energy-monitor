@@ -231,13 +231,10 @@ def thread_send_data_to_pvoutput(config, daemon=False):
             else:
                 watt_import = None
 
-            print ("watt_import:{0}".format(watt_import))
             if 'kW-out' in glob_p1_data:
                 watt_export = float(glob_p1_data['kW-out']) * 1000
             else:
                 watt_export = None
-
-            print ("watt_export:{0}".format(watt_export))
 
             # Calculate netto power import (neg is export)
             if (watt_import, watt_export) is not None:
@@ -245,8 +242,6 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
             else:
                 watt_net = None
-
-            print ("watt_net:{0}".format(float(watt_net)))
 
             if 'kWh-high' in glob_p1_data:
                 total_wh_import = float(glob_p1_data['kWh-high'] +
@@ -265,8 +260,6 @@ def thread_send_data_to_pvoutput(config, daemon=False):
         if glob_weather_data is not None:
 
             temp_c = glob_weather_data['current_observation']['temp_c']
-
-
 
     # Sending generation data (gross), separate from import/export (net).
     # See also: http://pvoutput.org/help.html#api-addstatus (net data)
@@ -301,6 +294,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                             [config, daemon])
         t.daemon = daemon
         t.start()
+
 
 def thread_get_weather(config, daemon):
 
