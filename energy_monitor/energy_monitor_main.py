@@ -243,17 +243,22 @@ def thread_send_data_to_pvoutput(config, daemon=False):
             # else:
             #     watt_net = None
 
-            if ('kWh-high', 'kWh-low') in glob_p1_data:
+            if ('kWh-high' and 'kWh-low') in glob_p1_data:
                 total_wh_import = float(glob_p1_data['kWh-high'] +
                                         glob_p1_data['kWh-low']) * 1000
             else:
                 total_wh_import = None
 
-            if ('kWh-out-high', 'kWh-out-low') in glob_p1_data:
+            logger.debug('Total Wh Import: {0}'.format(total_wh_import))
+
+
+            if ('kWh-out-high' and 'kWh-out-low') in glob_p1_data:
                 total_wh_export = float(glob_p1_data['kWh-out-high'] +
                                         glob_p1_data['kWh-out-low']) * 1000
             else:
                 total_wh_export = None
+
+            logger.debug('Total Wh Export: {0}'.format(total_wh_export))
 
     else:
         logger.error('No P1 Data! Problem with serial connection?')
