@@ -19,7 +19,7 @@ class Connection():
     def get_weather(self):
 
         url = "http://api.wunderground.com/api/" + self.api_key +\
-              "/geolookup/conditions/q/" + self.iso_country + "/" + \
+              "/conditions/q/" + self.iso_country + "/" + \
               self.city + ".json"
 
         self.logger.debug('Fetching weather data: {0}'.format(url))
@@ -38,12 +38,25 @@ class Connection():
                         "from wunderground, please check your api key")
                 return
 
-            location = parsed_json['location']['city']
-            temp_f = parsed_json['current_observation']['temp_f']
+            location = parsed_json['current_observation']['observation_location']['city']
+            display_location = parsed_json['current_observation']['display_location']['city']
+            # temp_f = parsed_json['current_observation']['temp_f']
             temp_c = parsed_json['current_observation']['temp_c']
+            station_id = parsed_json['current_observation']['station_id']
+            weather = parsed_json['current_observation']['weather']
+            uv = parsed_json['current_observation']['UV']
+
             self.logger.info(
-                "Current temperature in %s is: %s F "
-                "/ %s C" % (location, temp_f, temp_c))
+                "Location: {0}, observation location: {1}"
+                .format(display_location,location))
+            self.logger.info(
+                "Station ID: {0}".format(station_id))
+            self.logger.info("Temperature in C: {0}".format(temp_c))
+            self.logger.info(
+                "Reported Weather: {0}".format(weather))
+            self.logger.info(
+                "UV Index: {0}".format(uv))
+
             f.close()
 
             return parsed_json
