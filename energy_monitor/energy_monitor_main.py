@@ -60,6 +60,7 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
+lock = threading.Lock()
 
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -100,10 +101,13 @@ def thread_get_p1_data(config, daemon=False, simulate=False):
     p1_interval = config.getint('P1', 'interval')
 
     global glob_p1_data
+    lock.acquire()
 
     logger.info('GETTING Data From DSMR v4 Meter')
     p1_meter = dsmr4_p1.Meter(p1_device, simulate=simulate)
     glob_p1_data = p1_meter.get_telegram()
+
+    lock.release()
 
     for k, v in glob_p1_data.iteritems():
         logger.info("P1 DATA: key: {0} - value: {1}".format(k, v))
@@ -125,11 +129,15 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 
     global glob_pv_data
 
+    lock.acquire()
+
     logger.info('GETTING data from ABB VSN300 logger')
     pv_meter = abb_vsn300.Vsn300Reader(pv_host, pv_user, pv_password,
                                        pv_inverter_serial, simulate)
 
     return_data = pv_meter.get_last_stats()
+
+    lock.release()
 
     if not return_data is None:
         glob_pv_data = return_data
@@ -349,6 +357,8 @@ def thread_get_weather(config, daemon):
 
     global glob_weather_data
 
+    lock.acquire()
+
     api_key = config.get('WUNDERGROUND', 'api_key')
     iso_country = config.get('WUNDERGROUND', 'iso_country')
     city = config.get('WUNDERGROUND', 'city')
@@ -357,6 +367,8 @@ def thread_get_weather(config, daemon):
     connection = wunderground.Connection(api_key, iso_country, city)
 
     glob_weather_data = connection.get_weather()
+
+    lock.release()
 
     if daemon:
         t = threading.Timer(interval, thread_get_weather,
