@@ -3,9 +3,6 @@ import urllib2
 import json
 import logging
 
-
-
-
 class Connection():
 
     def __init__(self, api_key, iso_country, city):

@@ -73,7 +73,7 @@ class Vsn300Reader():
                 urllib2.install_opener(opener)
                 json_response = urllib2.urlopen(url, timeout=10)
                 parsed_json = json.load(json_response)
-            except (urllib2.HTTPError, urllib2.URLError) as e:
+            except (urllib2.HTTPError, urllib2.URLError, ValueError) as e:
                 self.logger.error(e)
                 return
 

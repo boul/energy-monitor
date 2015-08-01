@@ -97,6 +97,8 @@ def query_yes_no(question, default="yes"):
 
 def thread_get_p1_data(config, daemon=False, simulate=False):
 
+    # p1_lock = threading.Lock()
+
     p1_device = config.get('P1', 'p1_device')
     p1_interval = config.getint('P1', 'interval')
 
@@ -126,6 +128,8 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
     pv_inverter_serial = config.get('VSN300', 'inverter_serial')
     pv_user = config.get('VSN300', 'username')
     pv_password = config.get('VSN300', 'password')
+
+    # pv_lock = threading.Lock()
 
     global glob_pv_data
 
@@ -219,6 +223,8 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
+
+    lock.acquire()
 
     if 'glob_pv_data' in globals():
         if glob_pv_data is not None:
@@ -345,6 +351,8 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              vdc=None,
                              cumulative=False,
                              net=True)
+
+    lock.release()
 
     if daemon:
         t = threading.Timer(interval, thread_send_data_to_pvoutput,
