@@ -60,7 +60,7 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
-lock = threading.Lock()
+lock = threading.RLock()
 
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -97,22 +97,23 @@ def query_yes_no(question, default="yes"):
 
 def thread_get_p1_data(config, daemon=False, simulate=False):
 
-    # p1_lock = threading.Lock()
-
     p1_device = config.get('P1', 'p1_device')
     p1_interval = config.getint('P1', 'interval')
 
     global glob_p1_data
+
+    logger.debug("Release Lock - get_pv_data")
     lock.acquire()
 
     logger.info('GETTING Data From DSMR v4 Meter')
     p1_meter = dsmr4_p1.Meter(p1_device, simulate=simulate)
     glob_p1_data = p1_meter.get_telegram()
 
-    lock.release()
-
     for k, v in glob_p1_data.iteritems():
         logger.info("P1 DATA: key: {0} - value: {1}".format(k, v))
+
+    logger.debug("Release Lock - get_pv_data")
+    lock.release()
 
     if daemon:
         t = threading.Timer(p1_interval, thread_get_p1_data,
@@ -129,10 +130,9 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
     pv_user = config.get('VSN300', 'username')
     pv_password = config.get('VSN300', 'password')
 
-    # pv_lock = threading.Lock()
-
     global glob_pv_data
 
+    logger.debug("Acquire Lock - get_pv_data")
     lock.acquire()
 
     logger.info('GETTING data from ABB VSN300 logger')
@@ -141,7 +141,6 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 
     return_data = pv_meter.get_last_stats()
 
-    lock.release()
 
     if not return_data is None:
         glob_pv_data = return_data
@@ -150,6 +149,9 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
     else:
         glob_pv_data = None
         logger.warning('No data received from VSN300 logger')
+
+    logger.debug("Release Lock - get_pv_data")
+    lock.release()
 
     if daemon:
         t = threading.Timer(pv_interval, thread_get_pv_data,
@@ -170,6 +172,9 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
 
     server = carbon.CarbonClient(host, int(port))
 
+    logger.debug("Acquire Lock - send_carbon")
+    lock.acquire()
+
     if data_type == 'p1' and 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
@@ -187,6 +192,9 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
                 current_time = int(time.time())
                 path = base_path + "pv." + k
                 server.send_metric(path, v, current_time)
+
+    logger.debug("Release Lock - send_carbon")
+    lock.release()
 
     if daemon:
         t = threading.Timer(interval, thread_send_to_carbon,
@@ -224,6 +232,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
 
+    logger.debug("Acquire Lock - send pvoutput")
     lock.acquire()
 
     if 'glob_pv_data' in globals():
@@ -351,7 +360,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              vdc=None,
                              cumulative=False,
                              net=True)
-
+    logger.debug("Release Lock - send pvoutput")
     lock.release()
 
     if daemon:
@@ -365,6 +374,7 @@ def thread_get_weather(config, daemon):
 
     global glob_weather_data
 
+    logger.debug("Acquire Lock - get_weather")
     lock.acquire()
 
     api_key = config.get('WUNDERGROUND', 'api_key')
@@ -375,6 +385,8 @@ def thread_get_weather(config, daemon):
     connection = wunderground.Connection(api_key, iso_country, city)
 
     glob_weather_data = connection.get_weather()
+
+    logger.debug("Release Lock - get_weather")
 
     lock.release()
 
