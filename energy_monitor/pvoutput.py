@@ -1,6 +1,7 @@
 import urllib
 import httplib
 import logging
+import socket
 
 
 class Connection():
@@ -160,6 +161,10 @@ class Connection():
             'X-Pvoutput-Apikey': self.api_key,
             'X-Pvoutput-SystemId': self.system_id
         }
-        conn.request(method, path, params, headers)
+
+        try:
+            conn.request(method, path, params, headers)
+        except socket.error as e:
+            self.logger.error(e)
 
         return conn.getresponse()
