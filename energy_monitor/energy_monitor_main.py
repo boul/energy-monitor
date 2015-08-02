@@ -95,6 +95,14 @@ def query_yes_no(question, default="yes"):
                              "(or 'y' or 'n').\n")
 
 
+def time_in_range(start, end, x):
+    """Return true if x is in the range [start, end]"""
+    if start <= end:
+        return start <= x <= end
+    else:
+        return start <= x or x <= end
+
+
 def thread_get_p1_data(config, daemon=False, simulate=False):
 
     p1_device = config.get('P1', 'p1_device')
@@ -336,7 +344,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              time=time_now,
                              energy_exp=total_wh_generated,
                              power_exp=watt_generated,
-                             energy_imp=total_wh_import,
+                             energy_imp=None,
                              power_imp=None,
                              temp=temp_c,
                              vdc=vdc,
@@ -353,13 +361,31 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     pv_connection.add_status(date=date_now,
                              time=time_now,
                              energy_exp=None,
-                             power_exp=watt_generated,
+                             power_exp=watt_export,
                              energy_imp=None,
-                             power_imp=watt_net,
+                             power_imp=watt_import,
                              temp=None,
                              vdc=None,
                              cumulative=False,
                              net=True)
+
+    # eod_start = datetime.time(10,55,0)
+    # eod_stop =  datetime.time(12,10,0)
+    # eod_now = datetime.datetime.now().time()
+    # eod_cm = "EOD generated at: {0} {1}".format(date_now, time_now)
+    # eod_run = 0
+    #
+    # print datetime.datetime.now().time()
+    # print time_in_range(eod_start,eod_stop,eod_now)
+    #
+    # if time_in_range(eod_start,eod_stop,eod_now):
+    #     logger.info("Time to send EOD to pvoutput")
+    #     pv_connection.add_output(date=date_now,
+    #                              exported=total_wh_export,
+    #                              import_peak=kwh_high,
+    #                              import_offpeak=kwh_low,
+    #                              comments=eod_cm)
+
     logger.debug("Release Lock - send pvoutput")
     lock.release()
 

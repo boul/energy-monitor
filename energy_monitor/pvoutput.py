@@ -12,7 +12,7 @@ class Connection():
 
         self.logger = logging.getLogger(__name__)
 
-    def add_output(self, date, generated, exported=None, peak_power=None,
+    def add_output(self, date, generated=None, exported=None, peak_power=None,
                    peak_time=None, condition=None,
                    min_temp=None, max_temp=None, comments=None,
                    import_peak=None,
@@ -23,9 +23,9 @@ class Connection():
         path = '/service/r1/addoutput.jsp'
         params = {
             'd': date,
-            'g': generated
         }
-
+        if generated:
+            params['g'] = generated
         if exported:
             params['e'] = exported
         if peak_power:
@@ -46,6 +46,11 @@ class Connection():
             params['op'] = import_offpeak
         if import_shoulder:
             params['is'] = import_shoulder
+
+        for k, v in params.iteritems():
+            self.logger.info("Using key: {0} with value: {1}".format(k, v))
+
+        params = urllib.urlencode(params)
 
         response = self.make_request('POST', path, params)
 
@@ -75,7 +80,7 @@ class Connection():
             params['v2'] = power_exp
         if energy_imp:
             params['v3'] = energy_imp
-        if power_imp >= 0.0:
+        if power_imp:
             params['v4'] = power_imp
         if temp:
             params['v5'] = temp
