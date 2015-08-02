@@ -236,6 +236,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     gas_m3 = None
     inverter_temp = None
     watt_net = None
+    cons_net = None
 
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
@@ -316,11 +317,18 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
                 logger.info('Total Wh Export: {0}'.format(total_wh_export))
 
-            watt_net = None
+            # watt_net = None
             # Calculate netto power import (neg is export)
             if (watt_import, watt_export) is not None:
                 watt_net = float(watt_import) - float(watt_export)
                 logger.info('Netto Wh Import/Export: {0}'.format(watt_net))
+
+            if watt_generated is not None:
+                cons_net = watt_generated + watt_net
+                logger.info('Consumed Wh: {0}'.format(cons_net))
+            else:
+                cons_net = watt_net
+                logger.info('Consumed Wh: {0}'.format(cons_net))
 
     else:
         logger.error('No P1 Data! Problem with serial connection?')
@@ -344,8 +352,8 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              time=time_now,
                              energy_exp=total_wh_generated,
                              power_exp=watt_generated,
-                             energy_imp=None,
-                             power_imp=None,
+                             energy_imp=total_wh_import,
+                             power_imp=cons_net,
                              temp=temp_c,
                              vdc=vdc,
                              cumulative=True,
@@ -357,17 +365,17 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              v11=kwh_high,
                              v12=kwh_low)
 
-    logger.info("Sending (net) import/export data to pvoutput")
-    pv_connection.add_status(date=date_now,
-                             time=time_now,
-                             energy_exp=None,
-                             power_exp=watt_export,
-                             energy_imp=None,
-                             power_imp=watt_import,
-                             temp=None,
-                             vdc=None,
-                             cumulative=False,
-                             net=True)
+    # logger.info("Sending (net) import/export data to pvoutput")
+    # pv_connection.add_status(date=date_now,
+    #                          time=time_now,
+    #                          energy_exp=None,
+    #                          power_exp=watt_export,
+    #                          energy_imp=None,
+    #                          power_imp=watt_import,
+    #                          temp=None,
+    #                          vdc=None,
+    #                          cumulative=False,
+    #                          net=True)
 
     # eod_start = datetime.time(10,55,0)
     # eod_stop =  datetime.time(12,10,0)
