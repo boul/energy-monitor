@@ -35,13 +35,16 @@ class Connection():
                         "from wunderground, please check your api key")
                 return
 
-            location = parsed_json['current_observation']['observation_location']['city']
-            display_location = parsed_json['current_observation']['display_location']['city']
+            location = parsed_json['current_observation']['observation_location']\
+                .get('city', None)
+            display_location = parsed_json['current_observation']['display_location']\
+                .get('city', None)
             # temp_f = parsed_json['current_observation']['temp_f']
-            temp_c = parsed_json['current_observation']['temp_c']
-            station_id = parsed_json['current_observation']['station_id']
-            weather = parsed_json['current_observation']['weather']
-            uv = parsed_json['current_observation']['UV']
+            temp_c = parsed_json['current_observation']\
+                .get('temp_c', None)
+            station_id = parsed_json['current_observation'].get('station_id', None)
+            weather = parsed_json['current_observation'].get('weather', None)
+            uv = parsed_json['current_observation'].get('UV', None)
 
             self.logger.info(
                 "Location: {0}, observation location: {1}"

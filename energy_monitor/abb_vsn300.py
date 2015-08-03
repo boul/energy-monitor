@@ -1,6 +1,7 @@
 import urllib2
 import json
 import logging
+import socket
 __author__ = 'rkuipers'
 
 
@@ -73,7 +74,8 @@ class Vsn300Reader():
                 urllib2.install_opener(opener)
                 json_response = urllib2.urlopen(url, timeout=10)
                 parsed_json = json.load(json_response)
-            except (urllib2.HTTPError, urllib2.URLError, ValueError) as e:
+            except (urllib2.HTTPError, urllib2.URLError,
+                    ValueError, socket.timeout) as e:
                 self.logger.error(e)
                 return
 

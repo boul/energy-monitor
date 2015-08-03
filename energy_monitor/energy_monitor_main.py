@@ -341,7 +341,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     if 'glob_weather_data' in globals():
         if glob_weather_data is not None:
 
-            temp_c = glob_weather_data['current_observation']['temp_c']
+            temp_c = glob_weather_data['current_observation'].get('temp_c', None)
 
     # Sending generation data (gross), separate from import/export (net).
     # See also: http://pvoutput.org/help.html#api-addstatus (net data)
