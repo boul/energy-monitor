@@ -351,13 +351,13 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     logger.info("Sending (gross) pv generation data to pvoutput")
     pv_connection.add_status(date=date_now,
                              time=time_now,
-                             energy_exp=total_wh_generated,
+                             energy_exp=day_wh_generated,
                              power_exp=watt_generated,
-                             energy_imp=total_wh_import,
-                             power_imp=cons_net,
+                             energy_imp=None,
+                             power_imp=None,
                              temp=temp_c,
                              vdc=vdc,
-                             cumulative=True,
+                             cumulative=False,
                              net=False,
                              v8=gas_m3,
                              v7=inverter_temp,
@@ -366,17 +366,17 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              v11=kwh_high,
                              v12=kwh_low)
 
-    # logger.info("Sending (net) import/export data to pvoutput")
-    # pv_connection.add_status(date=date_now,
-    #                          time=time_now,
-    #                          energy_exp=None,
-    #                          power_exp=watt_export,
-    #                          energy_imp=None,
-    #                          power_imp=watt_import,
-    #                          temp=None,
-    #                          vdc=None,
-    #                          cumulative=False,
-    #                          net=True)
+    logger.info("Sending (net) import/export data to pvoutput")
+    pv_connection.add_status(date=date_now,
+                             time=time_now,
+                             energy_exp=day_wh_generated,
+                             power_exp=watt_export,
+                             energy_imp=None,
+                             power_imp=watt_import,
+                             temp=None,
+                             vdc=None,
+                             cumulative=False,
+                             net=True)
 
     # eod_start = datetime.time(10,55,0)
     # eod_stop =  datetime.time(12,10,0)
