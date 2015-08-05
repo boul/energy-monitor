@@ -35,27 +35,32 @@ class Connection():
                         "from wunderground, please check your api key")
                 return
 
-            location = parsed_json['current_observation']['observation_location']\
-                .get('city', None)
-            display_location = parsed_json['current_observation']['display_location']\
-                .get('city', None)
-            # temp_f = parsed_json['current_observation']['temp_f']
-            temp_c = parsed_json['current_observation']\
-                .get('temp_c', None)
-            station_id = parsed_json['current_observation'].get('station_id', None)
-            weather = parsed_json['current_observation'].get('weather', None)
-            uv = parsed_json['current_observation'].get('UV', None)
+            try:
+                location = parsed_json['current_observation']['observation_location']\
+                    .get('city', None)
+                display_location = parsed_json['current_observation']['display_location']\
+                    .get('city', None)
+                # temp_f = parsed_json['current_observation']['temp_f']
+                temp_c = parsed_json['current_observation']\
+                    .get('temp_c', None)
+                station_id = parsed_json['current_observation'].get('station_id', None)
+                weather = parsed_json['current_observation'].get('weather', None)
+                uv = parsed_json['current_observation'].get('UV', None)
 
-            self.logger.info(
-                "Location: {0}, observation location: {1}"
-                .format(display_location,location))
-            self.logger.info(
-                "Station ID: {0}".format(station_id))
-            self.logger.info("Temperature in C: {0}".format(temp_c))
-            self.logger.info(
-                "Reported Weather: {0}".format(weather))
-            self.logger.info(
-                "UV Index: {0}".format(uv))
+                self.logger.info(
+                    "Location: {0}, observation location: {1}"
+                    .format(display_location,location))
+                self.logger.info(
+                    "Station ID: {0}".format(station_id))
+                self.logger.info("Temperature in C: {0}".format(temp_c))
+                self.logger.info(
+                    "Reported Weather: {0}".format(weather))
+                self.logger.info(
+                    "UV Index: {0}".format(uv))
+
+            except KeyError as e:
+                self.logger.error(e)
+                return
 
             f.close()
 

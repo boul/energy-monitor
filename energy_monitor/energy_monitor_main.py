@@ -327,8 +327,9 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                 cons_net = watt_generated + watt_net
                 logger.info('Consumed Wh: {0}'.format(cons_net))
             else:
-                cons_net = watt_net
-                logger.info('Consumed Wh: {0}'.format(cons_net))
+
+                logger.error('Cannot calculate net consumption, '
+                             'we do not have generation numbers: {0}')
 
     else:
         logger.error('No P1 Data! Problem with serial connection?')
