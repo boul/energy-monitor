@@ -2,6 +2,7 @@ import urllib
 import httplib
 import logging
 import socket
+from httplib import BadStatusLine
 
 
 class Connection():
@@ -169,7 +170,10 @@ class Connection():
 
         try:
             conn.request(method, path, params, headers)
-        except socket.error as e:
+        except (socket.error, IOError, httplib.HTTPException,
+                httplib.BadStatusLine)\
+                as e:
             self.logger.error(e)
+            pass
 
         return conn.getresponse()

@@ -10,6 +10,7 @@ import datetime
 import time
 import sys
 import wunderground
+import enelogic
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -432,6 +433,95 @@ def thread_get_weather(config, daemon):
         t.start()
 
 
+def thread_send_to_enelogic(config, daemon):
+
+    logger.debug("Acquire Lock - send_to_enelogic")
+    lock.acquire()
+
+    now = datetime.datetime.now()
+    api_key = config.get('ENELOGIC', 'api_key')
+    app_key = config.get('ENELOGIC', 'app_key')
+    app_secret = config.get('ENELOGIC', 'app_secret')
+    username = config.get('ENELOGIC', 'username')
+    interval = config.getint('ENELOGIC', 'interval')
+    datetime_now = now.strftime('%Y%m%d %H:%M:%S')
+
+    # total_wh_generated = None
+    # time_now = now.strftime('%H:%M')
+
+    connection = enelogic.Connection(api_key, username, app_key, app_secret)
+
+    if 'glob_pv_data' in globals():
+        if glob_pv_data is not None:
+
+           # total_wh_generated = None
+            if 'm64061_1_TotalWH' in glob_pv_data:
+                total_wh_generated = float(glob_pv_data[
+                    'm64061_1_TotalWH'])
+                logger.info('Total (Lifetime) wH generated: {0}'
+                            .format(total_wh_generated))
+                connection.create_datapoint(total_wh_generated,
+                                            280, datetime_now, 90634)
+
+    else:
+        logger.warning('No PV Data! Sun down? or Logger Down?')
+
+    if 'glob_p1_data' in globals():
+        if glob_p1_data is not None:
+
+            # gas_m3 = None
+            if 'gas-m3' in glob_p1_data:
+                gas_m3 = float(glob_p1_data['gas-m3'])
+                logger.info('Total gas M3: {0}'.format(gas_m3))
+
+                connection.create_datapoint(gas_m3,
+                                            180, datetime_now, 90633)
+
+            # total_wh_import = None
+            if ('kWh-high' and 'kWh-low') in glob_p1_data:
+
+                kwh_low = glob_p1_data['kWh-low']
+                kwh_high = glob_p1_data['kWh-high']
+
+                connection.create_datapoint(kwh_low,
+                                            181, datetime_now, 90632)
+                connection.create_datapoint(kwh_high,
+                                            182, datetime_now, 90632)
+
+                logger.info('kWh-low: {0}'.format(kwh_low))
+                logger.info('kWh-high: {0}'.format(kwh_high))
+
+            # total_wh_export = None
+            if ('kWh-out-high' and 'kWh-out-low') in glob_p1_data:
+                kwh_out_low = glob_p1_data['kWh-out-low'] * 1000
+                kwh_out_high = glob_p1_data['kWh-out-high'] * 1000
+
+                connection.create_datapoint(kwh_out_low,
+                                            281, datetime_now, 90632)
+                connection.create_datapoint(kwh_out_high,
+                                            282, datetime_now, 90632)
+
+                logger.info('kWh-out-low: {0}'.format(kwh_out_low))
+                logger.info('kWh-out-high: {0}'.format(kwh_out_high))
+
+            else:
+                logger.error('No P1 Data! Problem with serial connection?')
+
+    if (glob_p1_data, glob_p1_data) is None:
+        logger.critical('No PV & P1 Data... returning...')
+        return
+
+    logger.debug("Release Lock - send_to_enelogic")
+
+    lock.release()
+
+    if daemon:
+        t = threading.Timer(interval, thread_get_weather,
+                            [config, daemon])
+        t.daemon = daemon
+        t.start()
+
+
 def write_config(path):
 
     import ConfigParser
@@ -481,6 +571,17 @@ def write_config(path):
     config.set('WUNDERGROUND', 'iso_country', 'NL')
     config.set('WUNDERGROUND', 'city', 'de_bilt')
     config.set('WUNDERGROUND', 'interval', '300')
+
+    config.add_section('ENELOGIC')
+    config.set('ENELOGIC', 'enable', 'true')
+    config.set('ENELOGIC', 'username', '')
+    config.set('ENELOGIC', 'app_key', '')
+    config.set('ENELOGIC', 'app_secret', '')
+    config.set('ENELOGIC', 'api_key', '')
+    config.set('ENELOGIC', 'interval', '60')
+    config.set('ENELOGIC', 'solar_point_id', '90634')
+    config.set('ENELOGIC', 'electricity_point_id', '90632')
+    config.set('ENELOGIC', 'gas_point_id', '90633')
 
     path = os.path.expanduser(path)
 
@@ -534,6 +635,7 @@ def main():
     pvoutput_enable = config.getboolean('PVOUTPUT', 'enable')
     carbon_enable = config.get('CARBON', 'enable')
     wunderground_enable = config.get('WUNDERGROUND', 'enable')
+    enelogic_enable = config.get('ENELOGIC', 'enable')
 
     if p1_enable:
 
@@ -554,6 +656,11 @@ def main():
 
         logger.info("STARTING PV Output data Timer Thread")
         thread_send_data_to_pvoutput(config, args.daemon)
+
+    if enelogic_enable:
+
+        logger.info("STARTING Enelogic Output data Timer Thread")
+        thread_send_to_enelogic(config, args.daemon)
 
     if carbon_enable:
 
