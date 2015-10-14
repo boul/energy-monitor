@@ -170,9 +170,8 @@ class Connection():
 
         try:
             conn.request(method, path, params, headers)
-        except (socket.error, IOError, httplib.HTTPException,
-                httplib.BadStatusLine)\
-                as e:
+        except Exception as e:
+
             self.logger.error(e)
             pass
 

@@ -163,11 +163,15 @@ class Connection():
         self.logger.debug("Data: {0} URL: {1} Headers: {2}".
                           format(url, values, headers))
 
-        request = urllib2.Request(url=url, data=values, headers=headers)
-        response_body = urllib2.urlopen(request).read()
-        response = json.loads(response_body)
+        try:
+            request = urllib2.Request(url=url, data=values, headers=headers)
+            response_body = urllib2.urlopen(request).read()
+            response = json.loads(response_body)
+            self.logger.debug("Response: {0}".format(response))
 
-        self.logger.debug("Response: {0}".format(response))
+        except Exception as e:
+            self.logger.error(e)
+            return
 
         return response
 
