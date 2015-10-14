@@ -458,8 +458,10 @@ def thread_send_to_enelogic(config, daemon):
             if 'm64061_1_TotalWH' in glob_pv_data:
                 total_wh_generated = float(glob_pv_data[
                     'm64061_1_TotalWH'])
-                logger.info('Total (Lifetime) wH generated: {0}'
+                logger.info('Creating Enelogic datapoint - '
+                            'Total wH generated: {0}'
                             .format(total_wh_generated))
+
                 connection.create_datapoint(total_wh_generated,
                                             280, datetime_now, 90634)
 
@@ -472,7 +474,8 @@ def thread_send_to_enelogic(config, daemon):
             # gas_m3 = None
             if 'gas-m3' in glob_p1_data:
                 gas_m3 = float(glob_p1_data['gas-m3'])
-                logger.info('Total gas M3: {0}'.format(gas_m3))
+                logger.info('Creating Enelogic datapoint - '
+                            'Total gas M3: {0}'.format(gas_m3))
 
                 connection.create_datapoint(gas_m3,
                                             180, datetime_now, 90633)
@@ -483,26 +486,31 @@ def thread_send_to_enelogic(config, daemon):
                 kwh_low = glob_p1_data['kWh-low']
                 kwh_high = glob_p1_data['kWh-high']
 
+                logger.info('Creating Enelogic datapoint - '
+                            'kWh-low: {0}'.format(kwh_low))
+
                 connection.create_datapoint(kwh_low,
                                             181, datetime_now, 90632)
+
+                logger.info('Creating Enelogic datapoint - '
+                            'kWh-high: {0}'.format(kwh_high))
                 connection.create_datapoint(kwh_high,
                                             182, datetime_now, 90632)
 
-                logger.info('kWh-low: {0}'.format(kwh_low))
-                logger.info('kWh-high: {0}'.format(kwh_high))
-
             # total_wh_export = None
             if ('kWh-out-high' and 'kWh-out-low') in glob_p1_data:
-                kwh_out_low = glob_p1_data['kWh-out-low'] * 1000
-                kwh_out_high = glob_p1_data['kWh-out-high'] * 1000
+                kwh_out_low = glob_p1_data['kWh-out-low']
+                kwh_out_high = glob_p1_data['kWh-out-high']
 
+                logger.info('Creating Enelogic datapoint - '
+                            'kWh-out-low: {0}'.format(kwh_out_low))
                 connection.create_datapoint(kwh_out_low,
                                             281, datetime_now, 90632)
+
+                logger.info('Creating Enelogic datapoint -'
+                            ' kWh-out-high: {0}'.format(kwh_out_high))
                 connection.create_datapoint(kwh_out_high,
                                             282, datetime_now, 90632)
-
-                logger.info('kWh-out-low: {0}'.format(kwh_out_low))
-                logger.info('kWh-out-high: {0}'.format(kwh_out_high))
 
             else:
                 logger.error('No P1 Data! Problem with serial connection?')
