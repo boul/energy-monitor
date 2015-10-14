@@ -1,36 +1,12 @@
-__author__ = 'rkuipers'
-
-import datetime
 import random
 import time
 import base64
-import urllib
-import httplib
-import socket
 import json
-import requests
-
-from hashlib import sha1 as _sha, md5 as _md5
 import urllib2
 import logging
-#
-# #
-# blausername = '468_1obfbrqlbkascog84osoocs0cww4w8kgggw0g8ck8g00ccowc4.roeland@boul.nl'
-# # password = '3vk44q2pyr28sgk04o08808ww4s80s8s0c80swsowo0g0o0ks.gk6gp8pev5kw088cskogk8kcc08osck'
-#
-# api_key = "468_1obfbrqlbkascog84osoocs0cww4w8kgggw0g8ck8g00ccowc4"
-# username = "roeland@boul.nl"
-# app_key = "3vk44q2pyr28sgk04o08808ww4s80s8s0c80swsowo0g0o0ks"
-# app_secret = "gk6gp8pev5kw088cskogk8kcc08osck"
-#
-# password = app_key +"." + app_secret
+from hashlib import sha1 as _sha, md5 as _md5
 
-# security = Security()
-# token = UsernameToken(username, password)
-# token.setnonce()
-# token.setcreated()
-# security.tokens.append(token)
-#client.set_options(wsse=security)
+__author__ = 'rkuipers'
 
 
 class Connection():
