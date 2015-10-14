@@ -524,7 +524,7 @@ def thread_send_to_enelogic(config, daemon):
     lock.release()
 
     if daemon:
-        t = threading.Timer(interval, thread_get_weather,
+        t = threading.Timer(interval, thread_send_to_enelogic,
                             [config, daemon])
         t.daemon = daemon
         t.start()
