@@ -438,7 +438,7 @@ def thread_send_to_enelogic(config, daemon):
     logger.debug("Acquire Lock - send_to_enelogic")
     lock.acquire()
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     api_key = config.get('ENELOGIC', 'api_key')
     app_key = config.get('ENELOGIC', 'app_key')
     app_secret = config.get('ENELOGIC', 'app_secret')
