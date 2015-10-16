@@ -173,6 +173,6 @@ class Connection():
         except Exception as e:
 
             self.logger.error(e)
-            pass
+            return
 
         return conn.getresponse()

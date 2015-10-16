@@ -435,16 +435,16 @@ def thread_get_weather(config, daemon):
 
 def thread_send_to_enelogic(config, daemon):
 
-    logger.debug("Acquire Lock - send_to_enelogic")
-    lock.acquire()
-
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
     api_key = config.get('ENELOGIC', 'api_key')
     app_key = config.get('ENELOGIC', 'app_key')
     app_secret = config.get('ENELOGIC', 'app_secret')
     username = config.get('ENELOGIC', 'username')
     interval = config.getint('ENELOGIC', 'interval')
     datetime_now = now.strftime('%Y%m%d %H:%M:%S')
+
+    logger.debug("Acquire Lock - send_to_enelogic")
+    lock.acquire()
 
     # total_wh_generated = None
     # time_now = now.strftime('%H:%M')
@@ -454,19 +454,31 @@ def thread_send_to_enelogic(config, daemon):
     if 'glob_pv_data' in globals():
         if glob_pv_data is not None:
 
-           # total_wh_generated = None
-            if 'm64061_1_TotalWH' in glob_pv_data:
-                total_wh_generated = float(glob_pv_data[
-                    'm64061_1_TotalWH'])
-                logger.info('Creating Enelogic datapoint - '
-                            'Total wH generated: {0}'
-                            .format(total_wh_generated))
+            # day_wh_generated = None
+            if 'm64061_1_DayWH' in glob_pv_data:
+                day_wh_generated = float(glob_pv_data['m64061_1_DayWH'])
+                logger.info('Day wH generated: {0}'.format(day_wh_generated))
 
-                connection.create_datapoint(total_wh_generated,
+                logger.info('Creating Enelogic datapoint - '
+                            'Day wH generated: {0}'
+                            .format(day_wh_generated))
+
+                connection.create_datapoint(day_wh_generated,
                                             280, datetime_now, 90634)
 
-    else:
-        logger.warning('No PV Data! Sun down? or Logger Down?')
+            # # total_wh_generated = None
+            # if 'm64061_1_TotalWH' in glob_pv_data:
+            #     total_wh_generated = float(glob_pv_data[
+            #         'm64061_1_TotalWH'])
+            #     logger.info('Creating Enelogic datapoint - '
+            #                 'Total wH generated: {0}'
+            #                 .format(total_wh_generated))
+            #
+            #     connection.create_datapoint(total_wh_generated,
+            #                                 280, datetime_now, 90634)
+
+        else:
+            logger.warning('No PV Data! Sun down? or Logger Down?')
 
     if 'glob_p1_data' in globals():
         if glob_p1_data is not None:
