@@ -113,10 +113,12 @@ class Connection():
 
         response = self.make_request('POST', path, params)
 
-        if response.status == 400:
-            self.logger.error(response.read())
-        if response.status != 200:
-            self.logger.error(response.read())
+        self.logger.debug(response)
+
+        # if response.status == 400:
+        #     self.logger.error(response.read())
+        # if response.status != 200:
+        #     self.logger.error(response.read())
 
     def get_status(self, date=None, time=None):
         """
@@ -170,7 +172,8 @@ class Connection():
 
         try:
             conn.request(method, path, params, headers)
-        except Exception as e:
+        # except Exception as e:
+        except:
 
             self.logger.error(e)
             return

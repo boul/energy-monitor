@@ -653,9 +653,9 @@ def main():
     p1_enable = config.getboolean('P1', 'enable')
     p1_interval = config.getint('P1', 'interval')
     pvoutput_enable = config.getboolean('PVOUTPUT', 'enable')
-    carbon_enable = config.get('CARBON', 'enable')
-    wunderground_enable = config.get('WUNDERGROUND', 'enable')
-    enelogic_enable = config.get('ENELOGIC', 'enable')
+    carbon_enable = config.getboolean('CARBON', 'enable')
+    wunderground_enable = config.getboolean('WUNDERGROUND', 'enable')
+    enelogic_enable = config.getboolean('ENELOGIC', 'enable')
 
     if p1_enable:
 
