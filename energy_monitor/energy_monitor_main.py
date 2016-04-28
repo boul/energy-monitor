@@ -11,6 +11,7 @@ import time
 import sys
 import wunderground
 import enelogic
+import domoticz
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -542,6 +543,151 @@ def thread_send_to_enelogic(config, daemon):
         t.start()
 
 
+def thread_send_to_domoticz(config, daemon):
+
+
+    url = config.get('DOMOTICZ', 'url')
+    username = config.get('DOMOTICZ', 'username')
+    password = config.get('DOMOTICZ', 'password')
+    username = config.get('DOMOTICZ', 'username')
+    interval = config.getint('DOMOTICZ', 'interval')
+    # pv_watt_ac_idx = config.getint('DOMOTICZ', 'pv_watt_ac_idx')
+    # pv_watt_dc_idx = config.getint('DOMOTICZ', 'pv_watt_dc_idx')
+    pv_volt_ac_idx = config.getint('DOMOTICZ', 'pv_volt_ac_idx')
+    pv_volt_dc_idx = config.getint('DOMOTICZ', 'pv_volt_dc_idx')
+    # pv_total_kwh_idx = config.getint('DOMOTICZ', 'pv_total_kwh_idx')
+    pv_amps_ac_idx = config.getint('DOMOTICZ', 'pv_amps_ac_idx')
+    pv_temp_1_idx = config.getint('DOMOTICZ', 'pv_temp_1_idx')
+    pv_temp_2_idx = config.getint('DOMOTICZ', 'pv_temp_2_idx')
+    pv_generation_idx = config.getint('DOMOTICZ', 'pv_generation_idx')
+    p1_gas_idx = config.getint('DOMOTICZ', 'p1_gas_idx')
+    p1_electricity_idx = config.getint('DOMOTICZ', 'p1_electricity_idx')
+    net_usage_idx = config.getint('DOMOTICZ', 'net_usage_idx')
+    watt_generated = None
+    watt_import = None
+    watt_export = None
+    watt_net = None
+
+
+
+
+    logger.debug("Acquire Lock - send_to_domoticz")
+    lock.acquire()
+
+    # total_wh_generated = None
+    # time_now = now.strftime('%H:%M')
+
+    connection = domoticz.Connection(url, username, password)
+
+    if 'glob_pv_data' in globals():
+        if glob_pv_data is not None:
+
+            # day_wh_generated = None
+            if 'm64061_1_DayWH' in glob_pv_data:
+                day_wh_generated = int(glob_pv_data['m64061_1_DayWH'] * 1000)
+                watt_generated = int(glob_pv_data['m101_1_W'] * 1000)
+
+                logger.info('Watt generated: {0}'.format(watt_generated))
+                logger.info('Day wH generated: {0}'.format(day_wh_generated))
+                logger.info('Send PV power generation to domoticz - '
+                            'Day wH generated: {0} - Current Watt: {1}'
+                            .format(day_wh_generated, watt_generated))
+
+                generated = str(watt_generated) + ";" + str(day_wh_generated)
+
+                connection.update_sensor(pv_generation_idx, generated)
+
+            # # total_wh_generated = None
+            # if 'm64061_1_TotalWH' in glob_pv_data:
+            #     total_wh_generated = float(glob_pv_data[
+            #         'm64061_1_TotalWH'])
+            #     logger.info('Creating Enelogic datapoint - '
+            #                 'Total wH generated: {0}'
+            #                 .format(total_wh_generated))
+            #
+            #     connection.create_datapoint(total_wh_generated,
+            #                                 280, datetime_now, 90634)
+
+        else:
+            logger.warning('No PV Data! Sun down? or Logger Down?')
+
+    if 'glob_p1_data' in globals():
+        if glob_p1_data is not None:
+
+            # gas_m3 = None
+            if 'gas-m3' in glob_p1_data:
+                gas_m3 = int(glob_p1_data['gas-m3']*1000)
+                logger.info('Send P1 Gas to Domoticz - '
+                            'Total gas M3: {0}'.format(gas_m3))
+
+                connection.update_sensor(p1_gas_idx, gas_m3)
+
+            if ('kWh-high' and 'kWh-low' and
+                    'kWh-out-high' and 'kWh-out-low' and 'kW-in' and
+                    'kW-out') in glob_p1_data:
+
+                kwh_low = int(glob_p1_data['kWh-low'] * 1000)
+                kwh_high =int(glob_p1_data['kWh-high'] * 1000)
+                kwh_out_low = int(glob_p1_data['kWh-out-low'] * 1000)
+                kwh_out_high = int(glob_p1_data['kWh-out-high'] * 1000)
+                kw_out = int(glob_p1_data['kW-out'] * 1000)
+                kw_in = int(glob_p1_data['kW-in'] * 1000)
+
+                elec_vals = str(kwh_low) + ";" + str(kwh_high) \
+                            + ";" + str(kwh_out_low) + ";" + str(kwh_out_high)\
+                            + ";" + str(kw_in) + ";" + str(kw_out)
+
+                logger.info('Send P1 power to Domoticz - {0}'.
+                    format(elec_vals))
+
+                connection.update_sensor(p1_electricity_idx, elec_vals)
+
+                 # watt_import = None
+                if 'kW-in' in glob_p1_data:
+                    watt_import = int(glob_p1_data['kW-in'] * 1000)
+
+                    logger.info('Total kW Import: {0}'.format(watt_import))
+
+                # watt_export = None
+                if 'kW-out' in glob_p1_data:
+                    watt_export = int(glob_p1_data['kW-out'] * 1000)
+
+                    logger.info('Total kW Export: {0}'.format(watt_export))
+
+
+                # watt_net = None
+                # Calculate netto power import (neg is export)
+                if (watt_import, watt_export) is not None:
+                    watt_net = float(watt_import) - float(watt_export)
+                    logger.info('Netto Wh Import/Export: {0}'.format(watt_net))
+                    cons_net = watt_net
+                    logger.info('Consumed Watt (ex-generation): {0}'.
+                                format(cons_net))
+                if watt_generated is not None:
+                    cons_net = watt_generated + watt_net
+                    logger.info('Consumed Watt (inc-generation): {0}'.
+                                format(cons_net))
+
+                connection.update_sensor(net_usage_idx, cons_net)
+
+            else:
+                logger.error('No P1 Data! Problem with serial connection?')
+
+    if (glob_p1_data, glob_p1_data) is None:
+        logger.critical('No PV & P1 Data... returning...')
+        return
+
+    logger.debug("Release Lock - send_to_domoticz")
+
+    lock.release()
+
+    if daemon:
+        t = threading.Timer(interval, thread_send_to_domoticz,
+                            [config, daemon])
+        t.daemon = daemon
+        t.start()
+
+
 def write_config(path):
 
     import ConfigParser
@@ -603,6 +749,25 @@ def write_config(path):
     config.set('ENELOGIC', 'electricity_point_id', '90632')
     config.set('ENELOGIC', 'gas_point_id', '90633')
 
+    config.add_section('DOMOTICZ')
+    config.set('DOMOTICZ', 'enable', 'True')
+    config.set('DOMOTICZ', 'username', 'admin')
+    config.set('DOMOTICZ', 'password', 'password')
+    config.set('DOMOTICZ', 'url', 'http://host:8080')
+    # config.set('DOMOTICZ', 'pv_watt_ac_idx', '')
+    # config.set('DOMOTICZ', 'pv_watt_dc_idx', '')
+    config.set('DOMOTICZ', 'pv_volt_ac_idx', '')
+    config.set('DOMOTICZ', 'pv_volt_dc_idx', '')
+    # config.set('DOMOTICZ', 'pv_total_kwh_idx', '')
+    config.set('DOMOTICZ', 'pv_amps_ac_idx', '')
+    config.set('DOMOTICZ', 'pv_temp_1_idx', '')
+    config.set('DOMOTICZ', 'pv_temp_2_idx', '')
+    config.set('DOMOTICZ', 'pv_generation_idx', '')
+    config.set('DOMOTICZ', 'interval', '10')
+    config.set('DOMOTICZ', 'p1_gas_idx', '')
+    config.set('DOMOTICZ', 'p1_electricity_idx', '')
+    config.set('DOMOTICZ', 'net_usage_idx', '')
+
     path = os.path.expanduser(path)
 
     if os.path.isfile(path):
@@ -656,6 +821,7 @@ def main():
     carbon_enable = config.getboolean('CARBON', 'enable')
     wunderground_enable = config.getboolean('WUNDERGROUND', 'enable')
     enelogic_enable = config.getboolean('ENELOGIC', 'enable')
+    domoticz_enable = config.getboolean('DOMOTICZ', 'enable')
 
     if p1_enable:
 
@@ -681,6 +847,11 @@ def main():
 
         logger.info("STARTING Enelogic Output data Timer Thread")
         thread_send_to_enelogic(config, args.daemon)
+
+    if domoticz_enable:
+
+        logger.info("STARTING Domoticz Output data Timer Thread")
+        thread_send_to_domoticz(config, args.daemon)
 
     if carbon_enable:
 

@@ -7,7 +7,7 @@ __author__ = 'rkuipers'
 
 class Connection():
 
-    def __init__(self, username, password, url):
+    def __init__(self, url, username, password):
 
         self.url = url
         self.username = username
@@ -18,7 +18,9 @@ class Connection():
     def update_sensor(self, idx, value):
 
         url = self.url + "/json.htm?type=command&param=udevice&idx=" \
-              + idx + "&nvalue=0&svalue=" + value
+              + str(idx) + "&nvalue=0&svalue=" + str(value)
+
+        self.logger.debug("Updating sensor: {0}".format(url))
 
         request = urllib2.Request(url=url)
         response_body = urllib2.urlopen(request).read()
