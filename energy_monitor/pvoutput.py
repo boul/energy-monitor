@@ -172,8 +172,8 @@ class Connection():
 
         try:
             conn.request(method, path, params, headers)
-        # except Exception as e:
-        except:
+        except Exception as e:
+        #except:
 
             self.logger.error(e)
             return

@@ -22,8 +22,13 @@ class Connection():
 
         self.logger.debug("Updating sensor: {0}".format(url))
 
-        request = urllib2.Request(url=url)
-        response_body = urllib2.urlopen(request).read()
-        response = json.loads(response_body)
+        try:
+
+            request = urllib2.Request(url=url)
+            response_body = urllib2.urlopen(request).read()
+            response = json.loads(response_body)
+        except Exception as e:
+            self.logger.error("Error on updating sensors: {0}".format(e))
+            return
 
         return response
