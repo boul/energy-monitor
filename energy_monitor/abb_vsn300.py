@@ -82,11 +82,14 @@ class Vsn300Reader():
 
         for k, v in path.iteritems():
 
+# Normally there are 10 data records, but on startup can be less records
+                idx = len(v['data'])-1
                 self.logger.info(
                     str(k) + " - " + str(v['description']) + " - " +
-                    str(v['data'][9]['value']))
+                    str(v['data'][idx]['timestamp']) + " - " +
+                    str(v['data'][idx]['value']))
 
-                stats[k] = v['data'][9]['value']
+                stats[k] = v['data'][idx]['value']
 
         self.logger.debug(stats)
 
