@@ -83,7 +83,7 @@ class Vsn300Reader():
         for k, v in path.iteritems():
 
                 self.logger.info(
-                    str(k) + " - " + str(v['description']) + " - " +
+                    str(k) + " - " + str(v['title']) + " - " +
                     str(v['data'][9]['value']))
 
                 stats[k] = v['data'][9]['value']
