@@ -12,6 +12,7 @@ import sys
 import wunderground
 import enelogic
 import domoticz
+import sunspec_modbus_tcp
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -151,7 +152,6 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 
     return_data = pv_meter.get_last_stats()
 
-
     if not return_data is None:
         glob_pv_data = return_data
         #send_data_to_carbon(config, return_data, "pv.")
@@ -165,6 +165,40 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 
     if daemon:
         t = threading.Timer(pv_interval, thread_get_pv_data,
+                            [config, daemon, simulate])
+        t.daemon = daemon
+        t.start()
+
+
+def thread_get_sunspec_data(config, daemon=False, simulate=False):
+
+    sunspec_host = config.get('SUNSPEC', 'host')
+    sunspec_port = config.get('SUNSPEC', 'port')
+    sunspec_interval = config.getint('SUNSPEC', 'interval')
+
+    global glob_sunspec_data
+
+    logger.debug("Acquire Lock - get_sunspec_data")
+    lock.acquire()
+
+    logger.info('GETTING data from SunSpec Modbus TCP')
+    sunspec_client = sunspec_modbus_tcp.SunSpecModBusTcpClient(sunspec_host,
+                                                               sunspec_port)
+
+    return_data = sunspec_client.get_sunspec_data()
+
+    if not return_data is None:
+        glob_sunspec_data = return_data
+
+    else:
+        glob_sunspec_data = None
+        logger.warning('No data received from SunSpec ModBus TCP')
+
+    logger.debug("Release Lock - get_sunspec_data")
+    lock.release()
+
+    if daemon:
+        t = threading.Timer(sunspec_interval, thread_get_sunspec_data,
                             [config, daemon, simulate])
         t.daemon = daemon
         t.start()
@@ -201,6 +235,20 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
 
                 current_time = int(time.time())
                 path = base_path + "pv." + k
+                server.send_metric(path, v, current_time)
+
+    if data_type == 'sunspec' and 'glob_sunspec_data' in globals():
+        if glob_sunspec_data is not None:
+
+            # remove empty / unused data
+            del(glob_sunspec_data['I_AC_Energy_WH_SF'])
+            del(glob_sunspec_data['I_AC_VoltageBC'])
+            del(glob_sunspec_data['I_AC_VoltageBN'])
+
+            for k, v in glob_sunspec_data.iteritems():
+
+                current_time = int(time.time())
+                path = base_path + "sunspec." + k
                 server.send_metric(path, v, current_time)
 
     logger.debug("Release Lock - send_carbon")
@@ -642,7 +690,7 @@ def thread_send_to_domoticz(config, daemon):
 
                 connection.update_sensor(p1_electricity_idx, elec_vals)
 
-                 # watt_import = None
+                # watt_import = None
                 if 'kW-in' in glob_p1_data:
                     watt_import = int(glob_p1_data['kW-in'] * 1000)
 
@@ -653,7 +701,6 @@ def thread_send_to_domoticz(config, daemon):
                     watt_export = int(glob_p1_data['kW-out'] * 1000)
 
                     logger.info('Total kW Export: {0}'.format(watt_export))
-
 
                 # watt_net = None
                 # Calculate netto power import (neg is export)
@@ -750,7 +797,7 @@ def write_config(path):
     config.set('ENELOGIC', 'gas_point_id', '90633')
 
     config.add_section('DOMOTICZ')
-    config.set('DOMOTICZ', 'enable', 'True')
+    config.set('DOMOTICZ', 'enable', 'true')
     config.set('DOMOTICZ', 'username', 'admin')
     config.set('DOMOTICZ', 'password', 'password')
     config.set('DOMOTICZ', 'url', 'http://host:8080')
@@ -767,6 +814,12 @@ def write_config(path):
     config.set('DOMOTICZ', 'p1_gas_idx', '')
     config.set('DOMOTICZ', 'p1_electricity_idx', '')
     config.set('DOMOTICZ', 'net_usage_idx', '')
+
+    config.add_section('SUNSPEC')
+    config.sections('SUNSPEC'), 'enable', 'false'
+    config.set('SUNSPEC', 'host', 'modbustcp.local')
+    config.set('SUNSPEC', 'port', '502')
+    config.set('SUNSPEC', 'interval', '10')
 
     path = os.path.expanduser(path)
 
@@ -817,11 +870,13 @@ def main():
     pv_interval = config.getint('VSN300', 'interval')
     p1_enable = config.getboolean('P1', 'enable')
     p1_interval = config.getint('P1', 'interval')
+    sunspec_interval = config.getint('SUNSPEC', 'interval')
     pvoutput_enable = config.getboolean('PVOUTPUT', 'enable')
     carbon_enable = config.getboolean('CARBON', 'enable')
     wunderground_enable = config.getboolean('WUNDERGROUND', 'enable')
     enelogic_enable = config.getboolean('ENELOGIC', 'enable')
     domoticz_enable = config.getboolean('DOMOTICZ', 'enable')
+    sunspec_enable = config.getboolean('SUNSPEC', 'enable')
 
     if p1_enable:
 
@@ -853,6 +908,11 @@ def main():
         logger.info("STARTING Domoticz Output data Timer Thread")
         thread_send_to_domoticz(config, args.daemon)
 
+    if sunspec_enable:
+
+        logger.info("STARTING Sunspec data Timer Thread")
+        thread_get_sunspec_data(config, args.daemon)
+
     if carbon_enable:
 
         logger.info("STARTING P1 metrics to CarbonTimer Thread")
@@ -860,6 +920,9 @@ def main():
 
         logger.info("STARTING PV metrics to CarbonTimer Thread")
         thread_send_to_carbon(pv_interval, config, 'pv', args.daemon)
+
+        logger.info("STARTING SunSpec metrics to CarbonTimer Thread")
+        thread_send_to_carbon(sunspec_interval, config, 'sunspec', args.daemon)
 
     if args.daemon:
 
