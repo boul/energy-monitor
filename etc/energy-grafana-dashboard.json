@@ -533,7 +533,7 @@
           "timeShift": null,
           "title": "Current Watt imported/exported",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -674,7 +674,7 @@
           "timeShift": null,
           "title": "Watt Generated / Exported",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -862,7 +862,7 @@
           "timeShift": null,
           "title": "Watt per phase imported from grid",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -1042,7 +1042,7 @@
           "timeShift": null,
           "title": "Amps per phase",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -1053,7 +1053,7 @@
           },
           "yaxes": [
             {
-              "format": "volt",
+              "format": "amp",
               "label": "Amps",
               "logBase": 1,
               "max": null,
@@ -1849,7 +1849,7 @@
           "timeShift": null,
           "title": "Failures",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -1961,7 +1961,7 @@
           "timeShift": null,
           "title": "Tariff",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -2073,7 +2073,7 @@
           "timeShift": null,
           "title": "Inverter Temperature",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -2177,7 +2177,7 @@
           "timeShift": null,
           "title": "AC Freq (Hz)",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -2435,7 +2435,7 @@
           "timeShift": null,
           "title": "Inverter DCV / ACV",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -2547,7 +2547,7 @@
           "timeShift": null,
           "title": "Inverter Amps AC",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -2688,7 +2688,7 @@
           "timeShift": null,
           "title": "DC W / AC W",
           "tooltip": {
-            "msResolution": false,
+            "msResolution": true,
             "shared": true,
             "sort": 0,
             "value_type": "cumulative"
@@ -2856,7 +2856,7 @@
             "value_type": "cumulative",
             "shared": true,
             "sort": 0,
-            "msResolution": false
+            "msResolution": true
           },
           "timeFrom": null,
           "timeShift": null,
@@ -2998,7 +2998,7 @@
             "value_type": "cumulative",
             "shared": true,
             "sort": 0,
-            "msResolution": false
+            "msResolution": true
           },
           "timeFrom": null,
           "timeShift": null,
@@ -3185,7 +3185,7 @@
             "value_type": "cumulative",
             "shared": true,
             "sort": 0,
-            "msResolution": false
+            "msResolution": true
           },
           "timeFrom": null,
           "timeShift": null,
@@ -3327,7 +3327,7 @@
             "value_type": "cumulative",
             "shared": true,
             "sort": 0,
-            "msResolution": false
+            "msResolution": true
           },
           "timeFrom": null,
           "timeShift": null,
@@ -3339,7 +3339,7 @@
     }
   ],
   "time": {
-    "from": "now-1h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -3386,7 +3386,7 @@
   },
   "refresh": false,
   "schemaVersion": 12,
-  "version": 35,
+  "version": 36,
   "links": [],
   "gnetId": null
 }
