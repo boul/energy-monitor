@@ -423,7 +423,7 @@ def thread_send_data_to_pvoutput(config, daemon=False):
                              power_imp=watt_import,
                              temp=None,
                              vdc=None,
-                             cumulative=True,
+                             cumulative=False,
                              net=True)
 
     # eod_start = datetime.time(10,55,0)
