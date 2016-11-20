@@ -611,7 +611,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_W",
+              "measurement": "energy.sunspec.W",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -685,7 +685,7 @@
           },
           "yaxes": [
             {
-              "format": "kwatt",
+              "format": "watt",
               "label": "Watt",
               "logBase": 1,
               "max": null,
@@ -874,7 +874,7 @@
           },
           "yaxes": [
             {
-              "format": "watt",
+              "format": "kwatt",
               "label": "Watt",
               "logBase": 1,
               "max": null,
@@ -1053,7 +1053,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "volt",
               "label": "Amps",
               "logBase": 1,
               "max": null,
@@ -2047,7 +2047,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_TmpCab",
+              "measurement": "energy.sunspec.TmpOt",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -2067,43 +2067,6 @@
               ],
               "tags": [],
               "target": "energy.pv.m101_1_TmpCab"
-            },
-            {
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "energy.pv.m101_1_TmpOt",
-              "policy": "default",
-              "refId": "B",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "value"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": [],
-              "target": "energy.pv.m101_1_TmpOt"
             }
           ],
           "timeFrom": null,
@@ -2188,7 +2151,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_Hz",
+              "measurement": "energy.sunspec.Hz",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -2301,7 +2264,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m64061_1_TotalWH",
+              "measurement": "energy.sunspec.WH",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -2409,7 +2372,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_DCV",
+              "measurement": "energy.sunspec.DCV_1",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -2446,7 +2409,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_PhVphA",
+              "measurement": "energy.sunspec.PhVphA",
               "policy": "default",
               "refId": "B",
               "resultFormat": "time_series",
@@ -2483,7 +2446,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "volt",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -2558,7 +2521,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_A",
+              "measurement": "energy.sunspec.A",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -2595,7 +2558,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "amp",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -2662,7 +2625,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_DCW",
+              "measurement": "energy.sunspec.DCW",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -2699,7 +2662,7 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "energy.pv.m101_1_W",
+              "measurement": "energy.sunspec.W",
               "policy": "default",
               "refId": "B",
               "resultFormat": "time_series",
@@ -2763,8 +2726,8 @@
     }
   ],
   "time": {
-    "from": "now/d",
-    "to": "now/d"
+    "from": "now-1h",
+    "to": "now"
   },
   "timepicker": {
     "collapse": false,
@@ -2810,7 +2773,7 @@
   },
   "refresh": false,
   "schemaVersion": 12,
-  "version": 30,
+  "version": 34,
   "links": [],
   "gnetId": null
 }
