@@ -172,10 +172,10 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 
 def thread_get_sunspec_data(config, daemon=False, simulate=False):
 
-    sunspec_host = config.get('SUNSPEC', 'host')
-    sunspec_port = config.getint('SUNSPEC', 'port')
-    sunspec_interval = config.getint('SUNSPEC', 'interval')
-    sunspec_id = config.getint('SUNSPEC', 'device_id')
+    sunspec_host = config.get('SUNSPEC_MODBUS', 'host')
+    sunspec_port = config.getint('SUNSPEC_MODBUS', 'port')
+    sunspec_interval = config.getint('SUNSPEC_MODBUS', 'interval')
+    sunspec_id = config.getint('SUNSPEC_MODBUS', 'device_id')
 
     global glob_sunspec_data
 
@@ -267,11 +267,8 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     now = datetime.datetime.now()
     date_now = now.strftime('%Y%m%d')
     time_now = now.strftime('%H:%M')
-    day_wh_generated = None
     total_wh_generated = None
     watt_generated = None
-    total_wh_import = None
-    #total_wh_export = None
     kwh_out_high = None
     kwh_out_low = None
     kwh_high = None
@@ -282,8 +279,6 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     vdc = None
     gas_m3 = None
     inverter_temp = None
-    watt_net = None
-    cons_net = None
 
     logger.info('SENDING metrics to pvoutput.org')
     pv_connection = pvoutput.Connection(api_key, system_id)
@@ -294,58 +289,74 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     if 'glob_pv_data' in globals():
         if glob_pv_data is not None:
 
-            #watt_generated = None
             if 'm101_1_W' in glob_pv_data:
                 watt_generated = float(glob_pv_data['m101_1_W']) * 1000
                 logger.info('Watt generated: {0}'.format(watt_generated))
 
-            # day_wh_generated = None
             if 'm64061_1_DayWH' in glob_pv_data:
                 day_wh_generated = float(glob_pv_data['m64061_1_DayWH']) * 1000
                 logger.info('Day wH generated: {0}'.format(day_wh_generated))
 
-            # total_wh_generated = None
             if 'm64061_1_TotalWH' in glob_pv_data:
                 total_wh_generated = float(glob_pv_data[
                     'm64061_1_TotalWH']) * 1000
                 logger.info('Total (Lifetime) wH generated: {0}'
                             .format(total_wh_generated))
 
-            # vdc = None
             if 'm101_1_DCV' in glob_pv_data:
                 vdc = glob_pv_data['m101_1_DCV']
                 logger.info('Volt DC: {0}'.format(vdc))
 
-            # inverter_temp = None
             if 'm101_1_TmpCab' in glob_pv_data:
                 inverter_temp = glob_pv_data['m101_1_TmpCab']
                 logger.info('Inverter Temperature: {0}'.format(inverter_temp))
 
+        else:
+
+            logger.warning('No PV Data! Sun down? or Logger Down?')
+
+    if 'glob_sunspec_data' in globals():
+        if glob_sunspec_data is not None:
+
+            if 'W' in glob_sunspec_data:
+                watt_generated = int(glob_sunspec_data['W'])
+                logger.info('Watt generated: {0}'.format(watt_generated))
+
+            if 'WH' in glob_sunspec_data:
+                total_wh_generated = int(glob_sunspec_data[
+                    'WH'])
+                logger.info('Total (Lifetime) wH generated: {0}'
+                            .format(total_wh_generated))
+
+            if 'DCV_1' in glob_sunspec_data:
+                vdc = glob_sunspec_data['DCV_1']
+                logger.info('Volt DC: {0}'.format(vdc))
+
+            if 'TmpOt' in glob_sunspec_data:
+                inverter_temp = glob_sunspec_data['TmpOt']
+                logger.info('Inverter Temperature: {0}'.format(inverter_temp))
+
     else:
 
-        logger.warning('No PV Data! Sun down? or Logger Down?')
+        logger.warning('No SunSpec Data! Sun down? or Logger Down?')
 
     if 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
-            # watt_import = None
             if 'kW-in' in glob_p1_data:
                 watt_import = float(glob_p1_data['kW-in']) * 1000
 
                 logger.info('Total kW Import: {0}'.format(watt_import))
 
-            # watt_export = None
             if 'kW-out' in glob_p1_data:
                 watt_export = float(glob_p1_data['kW-out']) * 1000
 
                 logger.info('Total kW Export: {0}'.format(watt_export))
 
-            # gas_m3 = None
             if 'gas-m3' in glob_p1_data:
                 gas_m3 = float(glob_p1_data['gas-m3'])
                 logger.info('Total gas M3: {0}'.format(gas_m3))
 
-            # total_wh_import = None
             if ('kWh-high' and 'kWh-low') in glob_p1_data:
 
                 kwh_low = glob_p1_data['kWh-low'] * 1000
@@ -355,7 +366,6 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
                 logger.info('Total Wh Import: {0}'.format(total_wh_import))
 
-            # total_wh_export = None
             if ('kWh-out-high' and 'kWh-out-low') in glob_p1_data:
                 kwh_out_low = glob_p1_data['kWh-out-low'] * 1000
                 kwh_out_high = glob_p1_data['kWh-out-high'] * 1000
@@ -364,28 +374,13 @@ def thread_send_data_to_pvoutput(config, daemon=False):
 
                 logger.info('Total Wh Export: {0}'.format(total_wh_export))
 
-            # watt_net = None
-            # Calculate netto power import (neg is export)
-            if (watt_import, watt_export) is not None:
-                watt_net = float(watt_import) - float(watt_export)
-                logger.info('Netto Wh Import/Export: {0}'.format(watt_net))
-
-            if watt_generated is not None:
-                cons_net = watt_generated + watt_net
-                logger.info('Consumed Wh: {0}'.format(cons_net))
-            else:
-
-                logger.error('Cannot calculate net consumption, '
-                             'we do not have generation numbers: {0}')
-
     else:
         logger.error('No P1 Data! Problem with serial connection?')
 
-    if (glob_p1_data, glob_p1_data) is None:
-        logger.critial('No PV & P1 Data... returning...')
+    if (glob_p1_data, glob_p1_data, glob_sunspec_data) is None:
+        logger.critial('No PV, SunSpec & P1 Data... returning...')
         return
 
-    # temp_c = None
     if 'glob_weather_data' in globals():
         if glob_weather_data is not None:
 
@@ -395,16 +390,22 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     # See also: http://pvoutput.org/help.html#api-addstatus (net data)
     # we need to send gross before net so they will be merged correctly
 
+
+            # params['v1'] = energy_exp = energy generation
+            # params['v2'] = power_exp = power generation
+            # params['v3'] = energy_imp = energy consumption
+            # params['v4'] = power_imp = power consumption
+
     logger.info("Sending (gross) pv generation data to pvoutput")
     pv_connection.add_status(date=date_now,
                              time=time_now,
-                             energy_exp=day_wh_generated,
+                             energy_exp=total_wh_generated,
                              power_exp=watt_generated,
                              energy_imp=None,
                              power_imp=None,
                              temp=temp_c,
                              vdc=vdc,
-                             cumulative=False,
+                             cumulative=True,
                              net=False,
                              v8=gas_m3,
                              v7=inverter_temp,
@@ -416,13 +417,13 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     logger.info("Sending (net) import/export data to pvoutput")
     pv_connection.add_status(date=date_now,
                              time=time_now,
-                             energy_exp=day_wh_generated,
+                             energy_exp=None,
                              power_exp=watt_export,
                              energy_imp=None,
                              power_imp=watt_import,
                              temp=None,
                              vdc=None,
-                             cumulative=False,
+                             cumulative=True,
                              net=True)
 
     # eod_start = datetime.time(10,55,0)
@@ -613,9 +614,6 @@ def thread_send_to_domoticz(config, daemon):
     watt_export = None
     watt_net = None
 
-
-
-
     logger.debug("Acquire Lock - send_to_domoticz")
     lock.acquire()
 
@@ -642,19 +640,28 @@ def thread_send_to_domoticz(config, daemon):
 
                 connection.update_sensor(pv_generation_idx, generated)
 
-            # # total_wh_generated = None
-            # if 'm64061_1_TotalWH' in glob_pv_data:
-            #     total_wh_generated = float(glob_pv_data[
-            #         'm64061_1_TotalWH'])
-            #     logger.info('Creating Enelogic datapoint - '
-            #                 'Total wH generated: {0}'
-            #                 .format(total_wh_generated))
-            #
-            #     connection.create_datapoint(total_wh_generated,
-            #                                 280, datetime_now, 90634)
-
         else:
             logger.warning('No PV Data! Sun down? or Logger Down?')
+
+    if 'glob_sunspec_data' in globals():
+        if glob_sunspec_data is not None:
+
+            if 'WH' in glob_sunspec_data:
+                wh_generated = int(glob_sunspec_data['WH'])
+                watt_generated = int(glob_sunspec_data['W'])
+
+                logger.info('Watt generated: {0}'.format(watt_generated))
+                logger.info('wH generated: {0}'.format(wh_generated))
+                logger.info('Send PV power generation to domoticz - '
+                            'wH generated: {0} - Current Watt: {1}'
+                            .format(wh_generated, watt_generated))
+
+                generated = str(watt_generated) + ";" + str(wh_generated)
+
+                connection.update_sensor(pv_generation_idx, generated)
+
+        else:
+            logger.warning('No SunSpec Data! Sun down? or Logger Down?')
 
     if 'glob_p1_data' in globals():
         if glob_p1_data is not None:
@@ -812,12 +819,12 @@ def write_config(path):
     config.set('DOMOTICZ', 'p1_electricity_idx', '')
     config.set('DOMOTICZ', 'net_usage_idx', '')
 
-    config.add_section('SUNSPEC')
-    config.sections('SUNSPEC'), 'enable', 'false'
-    config.set('SUNSPEC', 'host', 'modbustcp.local')
-    config.set('SUNSPEC', 'port', '502')
-    config.set('SUNSPEC', 'interval', '10')
-    config.set('SUNSPEC', 'device_id', '2')
+    config.add_section('SUNSPEC_MODBUS')
+    config.sections('SUNSPEC_MODBUS'), 'enable', 'false'
+    config.set('SUNSPEC_MODBUS', 'host', 'modbustcp.local')
+    config.set('SUNSPEC_MODBUS', 'port', '502')
+    config.set('SUNSPEC_MODBUS', 'interval', '10')
+    config.set('SUNSPEC_MODBUS', 'device_id', '2')
 
     path = os.path.expanduser(path)
 
@@ -868,13 +875,13 @@ def main():
     pv_interval = config.getint('VSN300', 'interval')
     p1_enable = config.getboolean('P1', 'enable')
     p1_interval = config.getint('P1', 'interval')
-    sunspec_interval = config.getint('SUNSPEC', 'interval')
+    sunspec_interval = config.getint('SUNSPEC_MODBUS', 'interval')
     pvoutput_enable = config.getboolean('PVOUTPUT', 'enable')
     carbon_enable = config.getboolean('CARBON', 'enable')
     wunderground_enable = config.getboolean('WUNDERGROUND', 'enable')
     enelogic_enable = config.getboolean('ENELOGIC', 'enable')
     domoticz_enable = config.getboolean('DOMOTICZ', 'enable')
-    sunspec_enable = config.getboolean('SUNSPEC', 'enable')
+    sunspec_enable = config.getboolean('SUNSPEC_MODBUS', 'enable')
 
     if p1_enable:
 
@@ -885,6 +892,12 @@ def main():
 
         logger.info("STARTING PV/VSN300 data Timer thread")
         thread_get_pv_data(config, args.daemon, args.simulate)
+
+    if sunspec_enable:
+
+        logger.info("STARTING Sunspec data Timer Thread")
+        thread_get_sunspec_data(config, args.daemon)
+
 
     if wunderground_enable:
 
@@ -905,11 +918,6 @@ def main():
 
         logger.info("STARTING Domoticz Output data Timer Thread")
         thread_send_to_domoticz(config, args.daemon)
-
-    if sunspec_enable:
-
-        logger.info("STARTING Sunspec data Timer Thread")
-        thread_get_sunspec_data(config, args.daemon)
 
     if carbon_enable:
 
