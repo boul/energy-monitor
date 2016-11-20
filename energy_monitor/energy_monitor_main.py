@@ -173,8 +173,9 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 def thread_get_sunspec_data(config, daemon=False, simulate=False):
 
     sunspec_host = config.get('SUNSPEC', 'host')
-    sunspec_port = config.get('SUNSPEC', 'port')
+    sunspec_port = config.getint('SUNSPEC', 'port')
     sunspec_interval = config.getint('SUNSPEC', 'interval')
+    sunspec_id = config.getint('SUNSPEC', 'device_id')
 
     global glob_sunspec_data
 
@@ -183,7 +184,8 @@ def thread_get_sunspec_data(config, daemon=False, simulate=False):
 
     logger.info('GETTING data from SunSpec Modbus TCP')
     sunspec_client = sunspec_modbus_tcp.SunSpecModBusTcpClient(sunspec_host,
-                                                               sunspec_port)
+                                                               sunspec_port,
+                                                               sunspec_id)
 
     return_data = sunspec_client.get_sunspec_data()
 
@@ -239,11 +241,6 @@ def thread_send_to_carbon(interval, config, data_type, daemon=False):
 
     if data_type == 'sunspec' and 'glob_sunspec_data' in globals():
         if glob_sunspec_data is not None:
-
-            # remove empty / unused data
-            del(glob_sunspec_data['I_AC_Energy_WH_SF'])
-            del(glob_sunspec_data['I_AC_VoltageBC'])
-            del(glob_sunspec_data['I_AC_VoltageBN'])
 
             for k, v in glob_sunspec_data.iteritems():
 
@@ -820,6 +817,7 @@ def write_config(path):
     config.set('SUNSPEC', 'host', 'modbustcp.local')
     config.set('SUNSPEC', 'port', '502')
     config.set('SUNSPEC', 'interval', '10')
+    config.set('SUNSPEC', 'device_id', '2')
 
     path = os.path.expanduser(path)
 
