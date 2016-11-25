@@ -11,7 +11,7 @@ class SunSpecModBusTcpClient():
         self.device_id = device_id
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        # self.logger.setLevel(logging.DEBUG)
 
     def get_sunspec_data(self):
 
@@ -71,7 +71,7 @@ class SunSpecModBusTcpClient():
                 'DCW_2': d.mppt.module[2].DCW,
                            }
 
-            self.logger.debug('Fetched SunSpec data points: {0}'.format(suns_data))
+            self.logger.info('Fetched SunSpec data points: {0}'.format(suns_data))
 
             return suns_data
 
