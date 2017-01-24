@@ -70,8 +70,11 @@ class SunSpecModBusTcpClient():
                 'DCV_2': d.mppt.module[2].DCV,
                 'DCW_2': d.mppt.module[2].DCW,
                            }
+            # Filter none
+            suns_data2 = {k: v for k, v in suns_data.items() if v is not None}
 
-            self.logger.info('Fetched SunSpec data points: {0}'.format(suns_data))
+            self.logger.info('Fetched SunSpec data points: {0}'.
+                             format(suns_data2))
 
             return suns_data
 
