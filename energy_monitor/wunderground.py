@@ -58,7 +58,7 @@ class Connection():
                 self.logger.info(
                     "UV Index: {0}".format(uv))
 
-            except KeyError as e:
+            except Exception as e:
                 self.logger.error(e)
                 return
 
@@ -66,7 +66,7 @@ class Connection():
 
             return parsed_json
 
-        except (urllib2.HTTPError, urllib2.URLError) as e:
+        except Exception as e:
             self.logger.error(e)
 
             return None
