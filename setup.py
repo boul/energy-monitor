@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='energy_monitor',
-    version='0.93',
+    version='0.94',
     packages=['energy_monitor',
               'sunspec',
               'sunspec.core',

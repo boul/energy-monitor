@@ -23,7 +23,8 @@ class SunSpecModBusTcpClient():
             d = client.SunSpecClientDevice(client.TCP,
                                            slave_id= self.device_id,
                                            ipaddr=self.host,
-                                           ipport=self.port)
+                                           ipport=self.port,
+                                           timeout=5)
 
             self.logger.info('Trying to fetch SunSpec data from ModBus')
 
@@ -76,7 +77,7 @@ class SunSpecModBusTcpClient():
             self.logger.info('Fetched SunSpec data points: {0}'.
                              format(suns_data2))
 
-            return suns_data
+            return suns_data2
 
         except Exception as e:
             self.logger.error(e)
