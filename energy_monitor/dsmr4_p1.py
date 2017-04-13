@@ -90,7 +90,7 @@ class Meter():
             self.logger.warning("SIMULATION!!! "
                              "Opening a file to simulate serial output")
 
-            ser = open("p1.raw", 'rb')
+            ser = open("/energy-monitor/test/p1.raw", 'rb')
 
             return ser
 

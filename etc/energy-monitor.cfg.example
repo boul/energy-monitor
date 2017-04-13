@@ -19,13 +19,51 @@ p1_device = /dev/ttyUSB0
 interval = 10
 
 [PVOUTPUT]
-enable = true
+enable = false
 api_key =
 system_id =
 interval = 300
 
 [CARBON]
-enable = true
+enable = false
 host = host.tld
 port = 2003
 base_path = power.
+
+[WUNDERGROUND]
+enable = false
+api_key = api-key
+iso_country = NL
+city = utrecht
+interval = 300
+
+[ENELOGIC]
+enable = false
+username = roeland@boul.nl
+app_key = key
+app_secret = secret
+api_key = key
+interval = 60
+
+[DOMOTICZ]
+enable = false
+interval = 300
+username = admin
+password = password
+url = http://url
+pv_volt_ac_idx = 46
+pv_volt_dc_idx = 47
+pv_amps_ac_idx = 32
+pv_temp_1_idx = 33
+pv_temp_2_idx = 34
+pv_generation_idx = 52
+p1_gas_idx = 53
+p1_electricity_idx = 51
+net_usage_idx = 50
+
+[SUNSPEC_MODBUS]
+enable = true
+host = host
+port = 502
+interval = 10
+device_id = 2

@@ -66,7 +66,7 @@ class Vsn300Reader():
 
         if self.simulate:
             self.logger.warning("RUNNING IN SIMULATION MODE!!!")
-            parsed_json = json.loads(open('vsn300.json').read())
+            parsed_json = json.loads(open('/energy-monitor/test/vsn300.json').read())
         else:
 
             try:
