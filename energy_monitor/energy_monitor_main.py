@@ -12,7 +12,11 @@ import sys
 import wunderground
 import enelogic
 import domoticz
+<<<<<<< HEAD
 import sunspec_modbus_tcp
+=======
+import paho.mqtt.client as mqtt
+>>>>>>> d9dde0493110812c307fa8dae7fd5e253366c773
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -738,6 +742,48 @@ def thread_send_to_domoticz(config, daemon):
         t.daemon = daemon
         t.start()
 
+def thread_send_to_mqtt(config, daemon):
+
+
+    host = config.get('MQTT', 'host')
+    username = config.get('MQTT', 'username')
+    password = config.get('MQTT', 'password')
+    topic = config.get('MQTT', 'topic')
+    interval = config.getint('MQTT', 'interval')
+
+
+    logger.debug("Acquire Lock - send_to_mqtt")
+    lock.acquire()
+
+    client = mqtt.Client()
+    client.connect(host, 1883, 60)
+    client.loop_start()
+    #( username, password)
+
+    if 'glob_pv_data' in globals():
+        if glob_pv_data is not None:
+
+            client.publish(topic + "/timestamp", str(int(time.time())))
+            for k,v in glob_pv_data.iteritems():
+#                print topic + "/" + k + " " + str(v)
+                client.publish(topic +"/"+k,v)
+        else:
+            logger.warning('No PV Data! Sun down? or Logger Down? - send_to_mqtt')
+
+    else:
+        logger.critical('No PV Data... returning...  - send_to_mqtt')
+        return
+
+    logger.debug("Release Lock - send_to_mqtt")
+
+    lock.release()
+
+    if daemon:
+        t = threading.Timer(interval, thread_send_to_mqtt,
+                            [config, daemon])
+        t.daemon = daemon
+        t.start()
+
 
 def write_config(path):
 
@@ -882,6 +928,7 @@ def main():
     enelogic_enable = config.getboolean('ENELOGIC', 'enable')
     domoticz_enable = config.getboolean('DOMOTICZ', 'enable')
     sunspec_enable = config.getboolean('SUNSPEC_MODBUS', 'enable')
+    mqtt_enable = config.getboolean('MQTT', 'enable')
 
     if p1_enable:
 
@@ -929,6 +976,11 @@ def main():
 
         logger.info("STARTING SunSpec metrics to CarbonTimer Thread")
         thread_send_to_carbon(sunspec_interval, config, 'sunspec', args.daemon)
+
+    if mqtt_enable:
+
+        logger.info("STARTING MQTT Output data Timer Thread")
+        thread_send_to_mqtt(config, args.daemon)
 
     if args.daemon:
 
