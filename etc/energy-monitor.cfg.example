@@ -67,3 +67,15 @@ host = host
 port = 502
 interval = 10
 device_id = 2
+
+[MQTT]
+enable = false
+interval = 10
+username = username
+password = password
+hostname = data.iot.eu-west-1.amazonaws.com
+port = 8883
+caPath =
+certPath =
+keyPath =
+topic = energy-monitor

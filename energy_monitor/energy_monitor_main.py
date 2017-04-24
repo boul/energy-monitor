@@ -12,11 +12,9 @@ import sys
 import wunderground
 import enelogic
 import domoticz
-<<<<<<< HEAD
 import sunspec_modbus_tcp
-=======
 import paho.mqtt.client as mqtt
->>>>>>> d9dde0493110812c307fa8dae7fd5e253366c773
+import ssl
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -68,6 +66,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 lock = threading.RLock()
+
 
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -742,36 +741,91 @@ def thread_send_to_domoticz(config, daemon):
         t.daemon = daemon
         t.start()
 
-def thread_send_to_mqtt(config, daemon):
+
+def thread_send_to_mqtt(interval, config, data_type, daemon):
 
 
     host = config.get('MQTT', 'host')
-    username = config.get('MQTT', 'username')
-    password = config.get('MQTT', 'password')
+    port = config.get('MQTT','port')
+    # username = config.get('MQTT', 'username')
+    # password = config.get('MQTT', 'password')
     topic = config.get('MQTT', 'topic')
-    interval = config.getint('MQTT', 'interval')
-
+    # interval = config.getint('MQTT', 'interval')
+    capath = config.get('MQTT', 'capath')
+    certpath = config.get('MQTT', 'certpath')
+    keypath = config.get('MQTT', 'keypath')
 
     logger.debug("Acquire Lock - send_to_mqtt")
     lock.acquire()
 
     client = mqtt.Client()
-    client.connect(host, 1883, 60)
+    client.tls_set(capath,
+                   certfile=certpath,
+                   keyfile=keypath,
+                   cert_reqs=ssl.CERT_REQUIRED,
+                   tls_version=ssl.PROTOCOL_TLSv1_2,
+                   ciphers=None)
+    client.connect(host, port)
     client.loop_start()
-    #( username, password)
 
-    if 'glob_pv_data' in globals():
+    if data_type == 'p1' and 'glob_p1_data' in globals():
+        if glob_p1_data is not None:
+
+            client.publish(topic + "/timestamp", str(int(time.time())))
+
+            for k, v in glob_p1_data.iteritems():
+
+                logger.debug("Topic: {0} Key: {1} Value: {2}"\
+                    .format(topic, k, v))
+                client.publish(topic + "/" + k, v)
+        else:
+            logger.warning('No P1 Data! Serial connection down? - '
+                           'send_to_mqtt')
+
+    if data_type == 'pv' and 'glob_pv_data' in globals():
         if glob_pv_data is not None:
 
             client.publish(topic + "/timestamp", str(int(time.time())))
-            for k,v in glob_pv_data.iteritems():
-#                print topic + "/" + k + " " + str(v)
-                client.publish(topic +"/"+k,v)
+
+            for k, v in glob_pv_data.iteritems():
+
+                logger.debug("Topic: {0} Key: {1} Value: {2}"\
+                    .format(topic, k, v))
+                client.publish(topic + "/" + k, v)
         else:
-            logger.warning('No PV Data! Sun down? or Logger Down? - send_to_mqtt')
+            logger.warning('No PV Data! Sun down? or Logger Down?'
+                           ' - send_to_mqtt')
+
+    if data_type == 'sunspec' and 'glob_sunspec_data' in globals():
+        if glob_sunspec_data is not None:
+
+            client.publish(topic + "/timestamp", str(int(time.time())))
+
+            for k, v in glob_sunspec_data.iteritems():
+
+                logger.debug("Topic: {0} Key: {1} Value: {2}"\
+                    .format(topic, k, v))
+                client.publish(topic + "/" + k, v)
+
+        else:
+            logger.warning('No SunSpec Data! Sun down? or Logger Down?'
+                           ' - send_to_mqtt')
+
+
+#
+#     if 'glob_pv_data' in globals():
+#         if glob_pv_data is not None:
+#
+#             client.publish(topic + "/timestamp", str(int(time.time())))
+#             for k,v in glob_pv_data.iteritems():
+# #                print topic + "/" + k + " " + str(v)
+#                 client.publish(topic + "/" + k, v)
+#         else:
+#             logger.warning('No PV Data! Sun down? or Logger Down? -
+# send_to_mqtt')
 
     else:
-        logger.critical('No PV Data... returning...  - send_to_mqtt')
+        logger.critical('No Data... returning...  - send_to_mqtt')
         return
 
     logger.debug("Release Lock - send_to_mqtt")
@@ -866,11 +920,22 @@ def write_config(path):
     config.set('DOMOTICZ', 'net_usage_idx', '')
 
     config.add_section('SUNSPEC_MODBUS')
-    config.sections('SUNSPEC_MODBUS'), 'enable', 'false'
+    config.set('SUNSPEC_MODBUS'), 'enable', 'false'
     config.set('SUNSPEC_MODBUS', 'host', 'modbustcp.local')
     config.set('SUNSPEC_MODBUS', 'port', '502')
     config.set('SUNSPEC_MODBUS', 'interval', '10')
     config.set('SUNSPEC_MODBUS', 'device_id', '2')
+
+    config.add_section('MQTT')
+    config.set('MQTT'), 'host', 'data.iot.eu-west-1.amazonaws.com'
+    config.set('MQTT'), 'port', '8883'
+    config.set('MQTT'), 'interval', '10'
+    config.set('MQTT'), 'topic', 'energy-monitor'
+    config.set('MQTT'), 'capath', ''
+    config.set('MQTT'), 'certpath', ''
+    config.set('MQTT'), 'keypath', ''
+    config.set('MQTT'), 'username', 'username'
+    comfig.set('MQTT'), 'password', 'password'
 
     path = os.path.expanduser(path)
 
@@ -979,8 +1044,15 @@ def main():
 
     if mqtt_enable:
 
-        logger.info("STARTING MQTT Output data Timer Thread")
-        thread_send_to_mqtt(config, args.daemon)
+        logger.info("STARTING P1 metrics to MQTT Thread")
+        thread_send_to_mqtt(p1_interval, config, 'p1', args.daemon)
+
+        logger.info("STARTING PV metrics to MQTT Thread")
+        thread_send_to_mqtt(pv_interval, config, 'pv', args.daemon)
+
+        logger.info("STARTING SunSpec metrics to MQTT Thread")
+        thread_send_to_mqtt(sunspec_interval, config, 'sunspec', args.daemon)
+
 
     if args.daemon:
 

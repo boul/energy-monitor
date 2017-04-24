@@ -16,6 +16,6 @@ setup(
     description='Monitors DSMR4 P1 Smart Meter and ABB VSN300 PV logger'
                 ' and sends stats to e.g. pvoutput.org',
     scripts=['bin/energy-monitor'],
-    install_requires=['PySerial'],
+    install_requires=['PySerial', 'paho-mqtt'],
     package_data={'sunspec': ['models/smdx/*']}
 )
