@@ -7,7 +7,7 @@ _tst = lambda x: (2000+int(x[0:2]),
                   int(x[4:6]),
                   int(x[6:8]),
                   int(x[8:10]))
-_gas = lambda tst, m3: (_tst(tst), _unit(m3))
+_gas = lambda tst, m3: (_unit(m3))
 _unit = lambda x: float(x.split('*', 1)[0])
 _tariff = lambda x: 'low' if x == '0002' else ('high' if x == '0001' else x)
 _id = lambda x: x
@@ -18,7 +18,7 @@ module_logger = logging.getLogger(__name__)
 
 OBIS = {
     '0-0:96.1.1': ('serial_id', _blackhole),
-    '0-0:1.0.0': ('timestamp', _tst),
+    '0-0:1.0.0': ('timestamp', _blackhole),
     '1-3:0.2.8': ('DSMR', _id),
     '1-0:1.8.1': ('kWh-low', _unit),
     '1-0:1.8.2': ('kWh-high', _unit),
@@ -157,7 +157,7 @@ class Meter():
 
             telegram[name] = data
 
-        telegram['gas-m3'] = telegram['gas'][1]
+        telegram['gas-m3'] = telegram['gas']
 
         self.logger.debug("***** Processed Message Start *****")
         self.logger.debug(telegram)

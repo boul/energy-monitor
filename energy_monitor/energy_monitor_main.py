@@ -15,6 +15,7 @@ import domoticz
 import sunspec_modbus_tcp
 import paho.mqtt.client as mqtt
 import ssl
+import json
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -771,13 +772,18 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'p1' and 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
+            bla = json.dumps(glob_p1_data)
+
             client.publish(topic + "/timestamp", str(int(time.time())))
+            client.publish(topic, bla)
+            logger.debug(bla)
 
             for k, v in glob_p1_data.iteritems():
 
                 logger.debug("Topic: {0} Key: {1} Value: {2}"\
                     .format(topic, k, v))
-                client.publish(topic + "/" + k, v)
+                # client.publish(topic + "/" + k, v)
+
         else:
             logger.warning('No P1 Data! Serial connection down? - '
                            'send_to_mqtt')
@@ -785,7 +791,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'pv' and 'glob_pv_data' in globals():
         if glob_pv_data is not None:
 
-            client.publish(topic + "/timestamp", str(int(time.time())))
+            # client.publish(topic + "/timestamp", str(int(time.time())))
 
             for k, v in glob_pv_data.iteritems():
 
@@ -799,7 +805,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'sunspec' and 'glob_sunspec_data' in globals():
         if glob_sunspec_data is not None:
 
-            client.publish(topic + "/timestamp", str(int(time.time())))
+            # client.publish(topic + "/timestamp", str(int(time.time())))
 
             for k, v in glob_sunspec_data.iteritems():
 
@@ -824,9 +830,9 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 #             logger.warning('No PV Data! Sun down? or Logger Down? -
 # send_to_mqtt')
 
-    else:
-        logger.critical('No Data... returning...  - send_to_mqtt')
-        return
+     # return else:
+     #    logger.critical('No Data... returning...  - send_to_mqtt')
+     #
 
     logger.debug("Release Lock - send_to_mqtt")
 
@@ -834,7 +840,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
     if daemon:
         t = threading.Timer(interval, thread_send_to_mqtt,
-                            [config, daemon])
+                            [interval, config, data_type, daemon])
         t.daemon = daemon
         t.start()
 
