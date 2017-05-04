@@ -14,8 +14,10 @@ import enelogic
 import domoticz
 import sunspec_modbus_tcp
 import paho.mqtt.client as mqtt
+import paho.mqtt.publish as publish
 import ssl
 import json
+import emoncms
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -766,21 +768,27 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
                    cert_reqs=ssl.CERT_REQUIRED,
                    tls_version=ssl.PROTOCOL_TLSv1_2,
                    ciphers=None)
+
     client.connect(host, port)
     client.loop_start()
+
+    power_data = dict()
 
     if data_type == 'p1' and 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
-            bla = json.dumps(glob_p1_data)
-
-            client.publish(topic + "/timestamp", str(int(time.time())))
-            client.publish(topic, bla)
-            logger.debug(bla)
+            p1_data = json.dumps(glob_p1_data)
+            # power_data['p1'] = p1_data
+            # print "**********************"
+            # print power_data
+            #
+            # client.publish(topic + "/timestamp", str(int(time.time())))
+            logger.debug(p1_data)
+            client.publish(topic + "/p1", str(p1_data))
 
             for k, v in glob_p1_data.iteritems():
 
-                logger.debug("Topic: {0} Key: {1} Value: {2}"\
+                logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"\
                     .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
 
@@ -791,13 +799,17 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'pv' and 'glob_pv_data' in globals():
         if glob_pv_data is not None:
 
+            pv_data = json.dumps(glob_pv_data)
+            logger.debug(pv_data)
+            client.publish(topic + "/pv", pv_data)
+
             # client.publish(topic + "/timestamp", str(int(time.time())))
 
             for k, v in glob_pv_data.iteritems():
 
-                logger.debug("Topic: {0} Key: {1} Value: {2}"\
+                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"\
                     .format(topic, k, v))
-                client.publish(topic + "/" + k, v)
+                # client.publish(topic + "/" + k, v)
         else:
             logger.warning('No PV Data! Sun down? or Logger Down?'
                            ' - send_to_mqtt')
@@ -806,12 +818,15 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
         if glob_sunspec_data is not None:
 
             # client.publish(topic + "/timestamp", str(int(time.time())))
+            sunspec_data = json.dumps(glob_sunspec_data)
+            logger.debug(sunspec_data)
+            client.publish(topic + "/sunspec", sunspec_data)
 
             for k, v in glob_sunspec_data.iteritems():
 
-                logger.debug("Topic: {0} Key: {1} Value: {2}"\
+                logger.debug("Topic: {0}/sunspec Key: {1} Value: {2}"\
                     .format(topic, k, v))
-                client.publish(topic + "/" + k, v)
+                # client.publish(topic + "/" + k, v)
 
         else:
             logger.warning('No SunSpec Data! Sun down? or Logger Down?'
@@ -836,10 +851,109 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
     logger.debug("Release Lock - send_to_mqtt")
 
+    client.loop_stop()
     lock.release()
 
     if daemon:
         t = threading.Timer(interval, thread_send_to_mqtt,
+                            [interval, config, data_type, daemon])
+        t.daemon = daemon
+        t.start()
+
+
+def thread_send_to_emoncms(interval, config, data_type, daemon):
+
+
+    # host = config.get('MQTT', 'host')
+    # port = config.get('MQTT','port')
+    # # username = config.get('MQTT', 'username')
+    # # password = config.get('MQTT', 'password')
+    # topic = config.get('MQTT', 'topic')
+    # # interval = config.getint('MQTT', 'interval')
+    # capath = config.get('MQTT', 'capath')
+    # certpath = config.get('MQTT', 'certpath')
+    # keypath = config.get('MQTT', 'keypath')
+
+    topic = "test"
+
+    logger.debug("Acquire Lock - send_to_emoncms")
+    lock.acquire()
+
+    client = emoncms.Connection("40cf5ce21892b6bf64990a828ca516a8")
+
+    if data_type == 'p1' and 'glob_p1_data' in globals():
+        if glob_p1_data is not None:
+
+            p1_data = json.dumps(glob_p1_data)
+
+            client.add_input("p1", p1_data)
+
+            for k, v in glob_p1_data.iteritems():
+
+                logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"\
+                    .format(topic, k, v))
+                # client.publish(topic + "/" + k, v)
+
+        else:
+            logger.warning('No P1 Data! Serial connection down? - '
+                           'send_to_emoncms')
+
+    if data_type == 'pv' and 'glob_pv_data' in globals():
+        if glob_pv_data is not None:
+
+            pv_data = json.dumps(glob_pv_data)
+            client.add_input("pv", pv_data)
+
+            for k, v in glob_pv_data.iteritems():
+
+                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"\
+                    .format(topic, k, v))
+                # client.publish(topic + "/" + k, v)
+        else:
+            logger.warning('No PV Data! Sun down? or Logger Down?'
+                           ' - send_to_emoncms')
+
+    if data_type == 'sunspec' and 'glob_sunspec_data' in globals():
+        if glob_sunspec_data is not None:
+
+            # client.publish(topic + "/timestamp", str(int(time.time())))
+            sunspec_data = json.dumps(glob_sunspec_data)
+
+            client.add_input("sunspec", sunspec_data)
+
+            for k, v in glob_sunspec_data.iteritems():
+
+                logger.debug("Topic: {0}/sunspec Key: {1} Value: {2}"\
+                    .format(topic, k, v))
+                # client.publish(topic + "/" + k, v)
+
+        else:
+            logger.warning('No SunSpec Data! Sun down? or Logger Down?'
+                           ' - send_to_emoncms')
+
+
+#
+#     if 'glob_pv_data' in globals():
+#         if glob_pv_data is not None:
+#
+#             client.publish(topic + "/timestamp", str(int(time.time())))
+#             for k,v in glob_pv_data.iteritems():
+# #                print topic + "/" + k + " " + str(v)
+#                 client.publish(topic + "/" + k, v)
+#         else:
+#             logger.warning('No PV Data! Sun down? or Logger Down? -
+# send_to_mqtt')
+
+     # return else:
+     #    logger.critical('No Data... returning...  - send_to_mqtt')
+     #
+
+    logger.debug("Release Lock - send_to_emoncms")
+
+    lock.release()
+
+    if daemon:
+        t = threading.Timer(interval, thread_send_to_emoncms,
                             [interval, config, data_type, daemon])
         t.daemon = daemon
         t.start()
@@ -1058,6 +1172,15 @@ def main():
 
         logger.info("STARTING SunSpec metrics to MQTT Thread")
         thread_send_to_mqtt(sunspec_interval, config, 'sunspec', args.daemon)
+
+        logger.info("STARTING P1 metrics to emoncms Thread")
+        thread_send_to_emoncms(p1_interval, config, 'p1', args.daemon)
+
+        logger.info("STARTING PV metrics to emoncms Thread")
+        thread_send_to_emoncms(pv_interval, config, 'pv', args.daemon)
+
+        logger.info("STARTING SunSpec metrics to emoncms Thread")
+        thread_send_to_emoncms(sunspec_interval, config, 'sunspec', args.daemon)
 
 
     if args.daemon:
