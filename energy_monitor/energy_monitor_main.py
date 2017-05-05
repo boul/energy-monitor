@@ -16,7 +16,7 @@ import paho.mqtt.client as mqtt
 import ssl
 import json
 import emoncms
-import enelogi
+import enelogic
 
 
 default_cfg = "~/.energy-monitor.cfg"
@@ -502,7 +502,7 @@ def thread_send_to_enelogic(config, daemon):
     # total_wh_generated = None
     # time_now = now.strftime('%H:%M')
 
-    connection = enelogi.Connection(api_key, username, app_key, app_secret)
+    connection = enelogic.Connection(api_key, username, app_key, app_secret)
 
     if 'glob_pv_data' in globals():
         if glob_pv_data is not None:
