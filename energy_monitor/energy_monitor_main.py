@@ -10,14 +10,14 @@ import datetime
 import time
 import sys
 import wunderground
-import enelogic
 import domoticz
 import sunspec_modbus_tcp
 import paho.mqtt.client as mqtt
-import paho.mqtt.publish as publish
 import ssl
 import json
 import emoncms
+import enelogic
+
 
 default_cfg = "~/.energy-monitor.cfg"
 
@@ -158,9 +158,9 @@ def thread_get_pv_data(config, daemon=False, simulate=False):
 
     return_data = pv_meter.get_last_stats()
 
-    if not return_data is None:
+    if return_data is not None:
         glob_pv_data = return_data
-        #send_data_to_carbon(config, return_data, "pv.")
+        # send_data_to_carbon(config, return_data, "pv.")
 
     else:
         glob_pv_data = None
@@ -195,7 +195,7 @@ def thread_get_sunspec_data(config, daemon=False, simulate=False):
 
     return_data = sunspec_client.get_sunspec_data()
 
-    if not return_data is None:
+    if return_data is not None:
         glob_sunspec_data = return_data
 
     else:
@@ -390,12 +390,12 @@ def thread_send_data_to_pvoutput(config, daemon=False):
     if 'glob_weather_data' in globals():
         if glob_weather_data is not None:
 
-            temp_c = glob_weather_data['current_observation'].get('temp_c', None)
+            temp_c = glob_weather_data['current_observation'].\
+                get('temp_c', None)
 
     # Sending generation data (gross), separate from import/export (net).
     # See also: http://pvoutput.org/help.html#api-addstatus (net data)
     # we need to send gross before net so they will be merged correctly
-
 
             # params['v1'] = energy_exp = energy generation
             # params['v2'] = power_exp = power generation
@@ -597,20 +597,19 @@ def thread_send_to_enelogic(config, daemon):
 
 def thread_send_to_domoticz(config, daemon):
 
-
     url = config.get('DOMOTICZ', 'url')
-    username = config.get('DOMOTICZ', 'username')
+    # username = config.get('DOMOTICZ', 'username')
     password = config.get('DOMOTICZ', 'password')
     username = config.get('DOMOTICZ', 'username')
     interval = config.getint('DOMOTICZ', 'interval')
     # pv_watt_ac_idx = config.getint('DOMOTICZ', 'pv_watt_ac_idx')
     # pv_watt_dc_idx = config.getint('DOMOTICZ', 'pv_watt_dc_idx')
-    pv_volt_ac_idx = config.getint('DOMOTICZ', 'pv_volt_ac_idx')
-    pv_volt_dc_idx = config.getint('DOMOTICZ', 'pv_volt_dc_idx')
+    # pv_volt_ac_idx = config.getint('DOMOTICZ', 'pv_volt_ac_idx')
+    # pv_volt_dc_idx = config.getint('DOMOTICZ', 'pv_volt_dc_idx')
     # pv_total_kwh_idx = config.getint('DOMOTICZ', 'pv_total_kwh_idx')
-    pv_amps_ac_idx = config.getint('DOMOTICZ', 'pv_amps_ac_idx')
-    pv_temp_1_idx = config.getint('DOMOTICZ', 'pv_temp_1_idx')
-    pv_temp_2_idx = config.getint('DOMOTICZ', 'pv_temp_2_idx')
+    # pv_amps_ac_idx = config.getint('DOMOTICZ', 'pv_amps_ac_idx')
+    # pv_temp_1_idx = config.getint('DOMOTICZ', 'pv_temp_1_idx')
+    # pv_temp_2_idx = config.getint('DOMOTICZ', 'pv_temp_2_idx')
     pv_generation_idx = config.getint('DOMOTICZ', 'pv_generation_idx')
     p1_gas_idx = config.getint('DOMOTICZ', 'p1_gas_idx')
     p1_electricity_idx = config.getint('DOMOTICZ', 'p1_electricity_idx')
@@ -619,6 +618,7 @@ def thread_send_to_domoticz(config, daemon):
     watt_import = None
     watt_export = None
     watt_net = None
+    cons_net = None
 
     logger.debug("Acquire Lock - send_to_domoticz")
     lock.acquire()
@@ -685,7 +685,7 @@ def thread_send_to_domoticz(config, daemon):
                     'kW-out') in glob_p1_data:
 
                 kwh_low = int(glob_p1_data['kWh-low'] * 1000)
-                kwh_high =int(glob_p1_data['kWh-high'] * 1000)
+                kwh_high = int(glob_p1_data['kWh-high'] * 1000)
                 kwh_out_low = int(glob_p1_data['kWh-out-low'] * 1000)
                 kwh_out_high = int(glob_p1_data['kWh-out-high'] * 1000)
                 kw_out = int(glob_p1_data['kW-out'] * 1000)
@@ -696,7 +696,7 @@ def thread_send_to_domoticz(config, daemon):
                             + ";" + str(kw_in) + ";" + str(kw_out)
 
                 logger.info('Send P1 power to Domoticz - {0}'.
-                    format(elec_vals))
+                            format(elec_vals))
 
                 connection.update_sensor(p1_electricity_idx, elec_vals)
 
@@ -747,9 +747,8 @@ def thread_send_to_domoticz(config, daemon):
 
 def thread_send_to_mqtt(interval, config, data_type, daemon):
 
-
     host = config.get('MQTT', 'host')
-    port = config.get('MQTT','port')
+    port = config.get('MQTT', 'port')
     # username = config.get('MQTT', 'username')
     # password = config.get('MQTT', 'password')
     topic = config.get('MQTT', 'topic')
@@ -772,7 +771,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     client.connect(host, port)
     client.loop_start()
 
-    power_data = dict()
+    # power_data = dict()
 
     if data_type == 'p1' and 'glob_p1_data' in globals():
         if glob_p1_data is not None:
@@ -788,8 +787,8 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
             for k, v in glob_p1_data.iteritems():
 
-                logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"\
-                    .format(topic, k, v))
+                logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"
+                             .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
 
         else:
@@ -807,8 +806,8 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
             for k, v in glob_pv_data.iteritems():
 
-                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"\
-                    .format(topic, k, v))
+                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"
+                             .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
         else:
             logger.warning('No PV Data! Sun down? or Logger Down?'
@@ -824,30 +823,13 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
             for k, v in glob_sunspec_data.iteritems():
 
-                logger.debug("Topic: {0}/sunspec Key: {1} Value: {2}"\
-                    .format(topic, k, v))
+                logger.debug("Topic: {0}/sunspec Key: {1} Value: {2}"
+                             .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
 
         else:
             logger.warning('No SunSpec Data! Sun down? or Logger Down?'
                            ' - send_to_mqtt')
-
-
-#
-#     if 'glob_pv_data' in globals():
-#         if glob_pv_data is not None:
-#
-#             client.publish(topic + "/timestamp", str(int(time.time())))
-#             for k,v in glob_pv_data.iteritems():
-# #                print topic + "/" + k + " " + str(v)
-#                 client.publish(topic + "/" + k, v)
-#         else:
-#             logger.warning('No PV Data! Sun down? or Logger Down? -
-# send_to_mqtt')
-
-     # return else:
-     #    logger.critical('No Data... returning...  - send_to_mqtt')
-     #
 
     logger.debug("Release Lock - send_to_mqtt")
 
@@ -862,7 +844,6 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
 
 def thread_send_to_emoncms(interval, config, data_type, daemon):
-
 
     # host = config.get('MQTT', 'host')
     # port = config.get('MQTT','port')
@@ -890,8 +871,8 @@ def thread_send_to_emoncms(interval, config, data_type, daemon):
 
             for k, v in glob_p1_data.iteritems():
 
-                logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"\
-                    .format(topic, k, v))
+                logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"
+                             .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
 
         else:
@@ -906,8 +887,8 @@ def thread_send_to_emoncms(interval, config, data_type, daemon):
 
             for k, v in glob_pv_data.iteritems():
 
-                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"\
-                    .format(topic, k, v))
+                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"
+                             .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
         else:
             logger.warning('No PV Data! Sun down? or Logger Down?'
@@ -923,30 +904,13 @@ def thread_send_to_emoncms(interval, config, data_type, daemon):
 
             for k, v in glob_sunspec_data.iteritems():
 
-                logger.debug("Topic: {0}/sunspec Key: {1} Value: {2}"\
-                    .format(topic, k, v))
+                logger.debug("Topic: {0}/sunspec Key: {1} Value: {2}"
+                             .format(topic, k, v))
                 # client.publish(topic + "/" + k, v)
 
         else:
             logger.warning('No SunSpec Data! Sun down? or Logger Down?'
                            ' - send_to_emoncms')
-
-
-#
-#     if 'glob_pv_data' in globals():
-#         if glob_pv_data is not None:
-#
-#             client.publish(topic + "/timestamp", str(int(time.time())))
-#             for k,v in glob_pv_data.iteritems():
-# #                print topic + "/" + k + " " + str(v)
-#                 client.publish(topic + "/" + k, v)
-#         else:
-#             logger.warning('No PV Data! Sun down? or Logger Down? -
-# send_to_mqtt')
-
-     # return else:
-     #    logger.critical('No Data... returning...  - send_to_mqtt')
-     #
 
     logger.debug("Release Lock - send_to_emoncms")
 
@@ -1040,22 +1004,22 @@ def write_config(path):
     config.set('DOMOTICZ', 'net_usage_idx', '')
 
     config.add_section('SUNSPEC_MODBUS')
-    config.set('SUNSPEC_MODBUS'), 'enable', 'false'
+    config.set('SUNSPEC_MODBUS', 'enable', 'false')
     config.set('SUNSPEC_MODBUS', 'host', 'modbustcp.local')
     config.set('SUNSPEC_MODBUS', 'port', '502')
     config.set('SUNSPEC_MODBUS', 'interval', '10')
     config.set('SUNSPEC_MODBUS', 'device_id', '2')
 
     config.add_section('MQTT')
-    config.set('MQTT'), 'host', 'data.iot.eu-west-1.amazonaws.com'
-    config.set('MQTT'), 'port', '8883'
-    config.set('MQTT'), 'interval', '10'
-    config.set('MQTT'), 'topic', 'energy-monitor'
-    config.set('MQTT'), 'capath', ''
-    config.set('MQTT'), 'certpath', ''
-    config.set('MQTT'), 'keypath', ''
-    config.set('MQTT'), 'username', 'username'
-    comfig.set('MQTT'), 'password', 'password'
+    config.set('MQTT', 'host', 'data.iot.eu-west-1.amazonaws.com')
+    config.set('MQTT', 'port', '8883')
+    config.set('MQTT', 'interval', '10')
+    config.set('MQTT', 'topic', 'energy-monitor')
+    config.set('MQTT', 'capath', '')
+    config.set('MQTT', 'certpath', '')
+    config.set('MQTT', 'keypath', '')
+    config.set('MQTT', 'username', 'username')
+    config.set('MQTT', 'password', 'password')
 
     path = os.path.expanduser(path)
 
@@ -1130,7 +1094,6 @@ def main():
         logger.info("STARTING Sunspec data Timer Thread")
         thread_get_sunspec_data(config, args.daemon)
 
-
     if wunderground_enable:
 
         logger.info("STARTING Wunderground Weather data Timer Thread")
@@ -1180,8 +1143,8 @@ def main():
         thread_send_to_emoncms(pv_interval, config, 'pv', args.daemon)
 
         logger.info("STARTING SunSpec metrics to emoncms Thread")
-        thread_send_to_emoncms(sunspec_interval, config, 'sunspec', args.daemon)
-
+        thread_send_to_emoncms(sunspec_interval, config, 'sunspec',
+                               args.daemon)
 
     if args.daemon:
 
@@ -1196,4 +1159,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # quit
         print "...Ctrl-C received!... exiting"
+
         sys.exit()
