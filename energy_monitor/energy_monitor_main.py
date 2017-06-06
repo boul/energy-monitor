@@ -767,9 +767,10 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
                    cert_reqs=ssl.CERT_REQUIRED,
                    tls_version=ssl.PROTOCOL_TLSv1_2,
                    ciphers=None)
-
-    client.connect(host, port)
-    client.loop_start()
+    try:
+        client.connect(host, port)
+        client.loop_start()
+    except exception as e
 
     # power_data = dict()
 
