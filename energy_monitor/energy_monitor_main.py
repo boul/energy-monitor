@@ -770,7 +770,8 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     try:
         client.connect(host, port)
         client.loop_start()
-    except exception as e
+    except Exception as e:
+        logger.error("Error on mqtt connection: {0}".format(e))
 
     # power_data = dict()
 
