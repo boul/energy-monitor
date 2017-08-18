@@ -6,8 +6,6 @@ import urllib2
 import logging
 from hashlib import sha1 as _sha, md5 as _md5
 
-__author__ = 'rkuipers'
-
 
 class Connection():
 
