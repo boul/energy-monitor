@@ -29,7 +29,7 @@ class Connection():
         try:
 
             request = urllib2.Request(url=url)
-            response_body = urllib2.urlopen(request).read()
+            response_body = urllib2.urlopen(request, timeout=4).read()
             # response = json.loads(response_body)
 
             self.logger.debug("Response: {0}".format(response_body))
