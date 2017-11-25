@@ -852,7 +852,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'atag_one' and 'glob_atag_one_data' in globals():
         if glob_atag_one_data is not None:
 
-            atag_one_data = json.dumps(glob_atag_one_data)
+            atag_one_data = glob_atag_one_data
             logger.debug(atag_one_data['retrieve_reply']['status'])
             logger.debug(topic)
             client.publish(topic + "/atagone", str(atag_one_data['retrieve_reply']['status']))
