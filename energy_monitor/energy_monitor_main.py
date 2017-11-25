@@ -17,6 +17,7 @@ import ssl
 import json
 import emoncms
 import enelogic
+import atag_one
 
 
 default_cfg = "~/.energy-monitor.cfg"
@@ -207,6 +208,39 @@ def thread_get_sunspec_data(config, daemon=False, simulate=False):
 
     if daemon:
         t = threading.Timer(sunspec_interval, thread_get_sunspec_data,
+                            [config, daemon, simulate])
+        t.daemon = daemon
+        t.start()
+
+
+def thread_get_atag_one_data(config, daemon=False, simulate=False):
+
+    atag_one_host = config.get('ATAG_ONE', 'host')
+    atag_one_interval = config.getint('ATAG_ONE', 'interval')
+    atag_one_timeout = config.getint('ATAG_ONE', 'timeout')
+
+    global glob_atag_one_data
+
+    logger.debug("Acquire Lock - get_atag_one_data")
+    lock.acquire()
+
+    logger.info('GETTING data from Atag One')
+    atag_one_client = atag_one.AtagOneReader(atag_one_host, atag_one_timeout)
+
+    return_data = atag_one_client.get_data()
+
+    if return_data is not None:
+        glob_atag_one_data = return_data
+
+    else:
+        glob_atag_one_data = None
+        logger.warning('No data received from Atag One')
+
+    logger.debug("Release Lock - get_atag_one_data")
+    lock.release()
+
+    if daemon:
+        t = threading.Timer(atag_one_interval, thread_get_atag_one_data,
                             [config, daemon, simulate])
         t.daemon = daemon
         t.start()
@@ -814,6 +848,23 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
         else:
             logger.warning('No PV Data! Sun down? or Logger Down?'
                            ' - send_to_mqtt')
+    if data_type == 'atag_one' and 'atag_one_data' in globals():
+        if atag_one_data is not None:
+
+            atag_one_data = json.dumps(glob_atag_one_data)
+            logger.debug(atag_one_data)
+            client.publish(topic + "/atag_one", atag_one_data)
+
+            # client.publish(topic + "/timestamp", str(int(time.time())))
+
+            for k, v in atag_one_data.iteritems():
+
+                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"
+                             .format(topic, k, v))
+                # client.publish(topic + "/" + k, v)
+        else:
+            logger.warning('No Atag One Data!'
+                           ' - send_to_mqtt')
 
     if data_type == 'sunspec' and 'glob_sunspec_data' in globals():
         if glob_sunspec_data is not None:
@@ -1022,6 +1073,13 @@ def write_config(path):
     config.set('MQTT', 'keypath', '')
     config.set('MQTT', 'username', 'username')
     config.set('MQTT', 'password', 'password')
+    config.set('MQTT', 'enable', 'false')
+
+    config.add_section('ATAG_ONE')
+    config.set('ATAG_ONE', 'host', '192.168.0.123')
+    config.set('ATAG_ONE', 'interval', '10')
+    config.set('ATAG_ONE', 'timeout', '10')
+    config.set('ATAG_ONE', 'enable', 'false')
 
     path = os.path.expanduser(path)
 
@@ -1080,6 +1138,7 @@ def main():
     domoticz_enable = config.getboolean('DOMOTICZ', 'enable')
     sunspec_enable = config.getboolean('SUNSPEC_MODBUS', 'enable')
     mqtt_enable = config.getboolean('MQTT', 'enable')
+    atag_one_enable = config.getboolean('ATAG_ONE', 'enable')
 
     if p1_enable:
 
@@ -1090,6 +1149,11 @@ def main():
 
         logger.info("STARTING PV/VSN300 data Timer thread")
         thread_get_pv_data(config, args.daemon, args.simulate)
+
+    if atag_one_enable:
+
+        logger.info("STARTING ATAG One data Timer thread")
+        thread_get_atag_one_data(config, args.daemon, args.simulate)
 
     if sunspec_enable:
 
@@ -1153,6 +1217,7 @@ def main():
         # keep main alive since we are launching daemon threads!
         while True:
             time.sleep(100)
+
 
 if __name__ == "__main__":
 
