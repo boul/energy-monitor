@@ -1143,6 +1143,7 @@ def main():
     sunspec_enable = config.getboolean('SUNSPEC_MODBUS', 'enable')
     mqtt_enable = config.getboolean('MQTT', 'enable')
     atag_one_enable = config.getboolean('ATAG_ONE', 'enable')
+    atag_one_interval = config.getint('ATAG_ONE', 'interval')
 
     if p1_enable:
 
@@ -1204,7 +1205,7 @@ def main():
         thread_send_to_mqtt(pv_interval, config, 'pv', args.daemon)
 
         logger.info("STARTING Atag One metrics to MQTT Thread")
-        thread_send_to_mqtt(pv_interval, config, 'atag_one', args.daemon)
+        thread_send_to_mqtt(atag_one_interval, config, 'atag_one', args.daemon)
 
         logger.info("STARTING SunSpec metrics to MQTT Thread")
         thread_send_to_mqtt(sunspec_interval, config, 'sunspec', args.daemon)
