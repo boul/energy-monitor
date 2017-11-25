@@ -848,8 +848,9 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
         else:
             logger.warning('No PV Data! Sun down? or Logger Down?'
                            ' - send_to_mqtt')
-    if data_type == 'atag_one' and 'atag_one_data' in globals():
-        if atag_one_data is not None:
+
+    if data_type == 'atag_one' and 'glob_atag_one_data' in globals():
+        if glob_atag_one_data is not None:
 
             atag_one_data = json.dumps(glob_atag_one_data)
             logger.debug(atag_one_data)
@@ -1198,6 +1199,9 @@ def main():
 
         logger.info("STARTING PV metrics to MQTT Thread")
         thread_send_to_mqtt(pv_interval, config, 'pv', args.daemon)
+
+        logger.info("STARTING Atag One metrics to MQTT Thread")
+        thread_send_to_mqtt(pv_interval, config, 'atag_one', args.daemon)
 
         logger.info("STARTING SunSpec metrics to MQTT Thread")
         thread_send_to_mqtt(sunspec_interval, config, 'sunspec', args.daemon)
