@@ -855,14 +855,15 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
             atag_one_data = json.dumps(glob_atag_one_data)
             logger.debug(atag_one_data)
             client.publish(topic + "/atag_one", atag_one_data)
+            
 
             # client.publish(topic + "/timestamp", str(int(time.time())))
 
-            for k, v in atag_one_data.iteritems():
-
-                logger.debug("Topic: {0}/pv Key: {1} Value: {2}"
-                             .format(topic, k, v))
-                # client.publish(topic + "/" + k, v)
+            # for k, v in atag_one_data.iteritems():
+            #
+            #     logger.debug("Topic: {0}/pv Key: {1} Value: {2}"
+            #                  .format(topic, k, v))
+            #     # client.publish(topic + "/" + k, v)
         else:
             logger.warning('No Atag One Data!'
                            ' - send_to_mqtt')
