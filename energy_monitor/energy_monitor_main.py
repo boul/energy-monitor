@@ -853,9 +853,9 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
         if glob_atag_one_data is not None:
 
             atag_one_data = json.dumps(glob_atag_one_data)
-            logger.debug(atag_one_data)
+            logger.debug(atag_one_data['retrieve_reply']['status'])
             logger.debug(topic)
-            client.publish(topic + "/atagone", str(atag_one_data))
+            client.publish(topic + "/atagone", str(atag_one_data['retrieve_reply']['status']))
 
 
             # client.publish(topic + "/timestamp", str(int(time.time())))
