@@ -854,7 +854,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
             atag_one_data = glob_atag_one_data
             logger.debug(atag_one_data['retrieve_reply']['status'])
-            data = json.dumps(atag_one_data['retrieve_reply']['status'])
+            data = json.dumps(atag_one_data['retrieve_reply'])
             logger.debug(topic)
             client.publish(topic + "/atagone", data)
 
