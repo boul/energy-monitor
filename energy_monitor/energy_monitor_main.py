@@ -819,7 +819,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
             #
             # client.publish(topic + "/timestamp", str(int(time.time())))
             logger.debug(p1_data)
-            client.publish(topic + "/p1", str(p1_data))
+            client.publish(topic + "/p1", str(p1_data), qos=1)
 
             for k, v in glob_p1_data.iteritems():
 
@@ -836,7 +836,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
 
             pv_data = json.dumps(glob_pv_data)
             logger.debug(pv_data)
-            client.publish(topic + "/pv", pv_data)
+            client.publish(topic + "/pv", pv_data, qos=1)
 
             # client.publish(topic + "/timestamp", str(int(time.time())))
 
@@ -856,7 +856,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
             logger.debug(atag_one_data['retrieve_reply']['status'])
             data = json.dumps(atag_one_data['retrieve_reply'])
             logger.debug(topic)
-            client.publish(topic + "/atag", data)
+            client.publish(topic + "/atag", data, qos=1)
 
 
             # client.publish(topic + "/timestamp", str(int(time.time())))
@@ -876,7 +876,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
             # client.publish(topic + "/timestamp", str(int(time.time())))
             sunspec_data = json.dumps(glob_sunspec_data)
             logger.debug(sunspec_data)
-            client.publish(topic + "/sunspec", sunspec_data)
+            client.publish(topic + "/sunspec", sunspec_data, qos=1)
 
             for k, v in glob_sunspec_data.iteritems():
 
