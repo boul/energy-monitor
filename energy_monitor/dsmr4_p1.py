@@ -12,7 +12,7 @@ _unit = lambda x: float(x.split('*', 1)[0])
 _tariff = lambda x: 'low' if x == '0002' else ('high' if x == '0001' else x)
 _id = lambda x: x
 _int = lambda x: int(x)
-_blackhole = lambda x: None
+_blackhole = lambda x: int(0)
 
 module_logger = logging.getLogger(__name__)
 
