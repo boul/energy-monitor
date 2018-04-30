@@ -19,7 +19,7 @@ module_logger = logging.getLogger(__name__)
 
 OBIS = {
     '0-0:96.1.1': ('serial_id', _blackhole),
-    '0-0:1.0.0': ('timestamp', _blackhole),
+    '0-0:1.0.0': ('tstamp', _blackhole),
     '1-3:0.2.8': ('DSMR', _int),
     '1-0:1.8.1': ('kWh-low', _unit),
     '1-0:1.8.2': ('kWh-high', _unit),
