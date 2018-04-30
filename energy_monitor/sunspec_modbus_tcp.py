@@ -1,5 +1,6 @@
 import sunspec.core.client as client
 import logging
+import time
 import datetime
 
 
@@ -16,6 +17,7 @@ class SunSpecModBusTcpClient():
 
     def get_sunspec_data(self):
 
+        ts = time.time()
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
         self.logger.info('Creating SunSpec modbus TCP client,'
