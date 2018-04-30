@@ -1,5 +1,6 @@
 import sunspec.core.client as client
 import logging
+import time
 
 
 class SunSpecModBusTcpClient():
@@ -14,6 +15,8 @@ class SunSpecModBusTcpClient():
         # self.logger.setLevel(logging.DEBUG)
 
     def get_sunspec_data(self):
+
+        ts = time.time()
 
         self.logger.info('Creating SunSpec modbus TCP client,'
                          ' Host: {0} - Port: {1} - DeviceID: {2}'
@@ -70,6 +73,7 @@ class SunSpecModBusTcpClient():
                 'DCA_2': d.mppt.module[2].DCA,
                 'DCV_2': d.mppt.module[2].DCV,
                 'DCW_2': d.mppt.module[2].DCW,
+                'TimeStamp': ts,
                            }
             # Filter none
             suns_data2 = {k: v for k, v in suns_data.items() if v is not None}

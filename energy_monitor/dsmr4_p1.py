@@ -11,6 +11,7 @@ _gas = lambda tst, m3: (_unit(m3))
 _unit = lambda x: float(x.split('*', 1)[0])
 _tariff = lambda x: 'low' if x == '0002' else ('high' if x == '0001' else x)
 _id = lambda x: x
+_int = lambda x: int(x)
 _blackhole = lambda x: None
 
 module_logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ module_logger = logging.getLogger(__name__)
 OBIS = {
     '0-0:96.1.1': ('serial_id', _blackhole),
     '0-0:1.0.0': ('timestamp', _blackhole),
-    '1-3:0.2.8': ('DSMR', _id),
+    '1-3:0.2.8': ('DSMR', _int),
     '1-0:1.8.1': ('kWh-low', _unit),
     '1-0:1.8.2': ('kWh-high', _unit),
     '1-0:2.8.1': ('kWh-out-low', _unit),
@@ -29,16 +30,16 @@ OBIS = {
     '1-0:1.7.0': ('kW-in', _unit),
     '1-0:2.7.0': ('kW-out', _unit),
     '0-0:96.3.10': ('switch', _id),
-    '0-0:96.13.1': ('msg-numeric', _id),
+    '0-0:96.13.1': ('msg-numeric', _blackhole),
     '0-0:96.13.0': ('msg-txt', _blackhole),
-    '0-0:96.7.21': ('failures', _id),
-    '0-0:96.7.9': ('extended-failures', _id),
-    '1-0:32.32.0': ('V-sags-l1', _id),
-    '1-0:52.32.0': ('V-sags-l2', _id),
-    '1-0:72.32.0': ('V-sags-l3', _id),
-    '1-0:32.36.0': ('V-swells-l1', _id),
-    '1-0:52.36.0': ('V-swells-l2', _id),
-    '1-0:72.36.0': ('V-swells-l3', _id),
+    '0-0:96.7.21': ('failures', _int),
+    '0-0:96.7.9': ('extended-failures', _int),
+    '1-0:32.32.0': ('V-sags-l1', _int),
+    '1-0:52.32.0': ('V-sags-l2', _int),
+    '1-0:72.32.0': ('V-sags-l3', _int),
+    '1-0:32.36.0': ('V-swells-l1', _int),
+    '1-0:52.36.0': ('V-swells-l2', _int),
+    '1-0:72.36.0': ('V-swells-l3', _int),
     '1-0:31.7.0': ('A-l1', _unit),
     '1-0:51.7.0': ('A-l2', _unit),
     '1-0:71.7.0': ('A-l3', _unit),
@@ -48,7 +49,7 @@ OBIS = {
     '1-0:22.7.0': ('kW-l1-out', _unit),
     '1-0:42.7.0': ('kW-l2-out', _unit),
     '1-0:62.7.0': ('kW-l3-out', _unit),
-    '0-1:24.1.0': ('type', _id),
+    '0-1:24.1.0': ('type', _int),
     '0-1:96.1.0': ('id-gas', _blackhole),
     '0-1:24.2.1': ('gas', _gas),
     '0-1:24.4.0': ('gas-switch', _id),
