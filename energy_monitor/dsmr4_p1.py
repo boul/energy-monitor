@@ -165,6 +165,7 @@ class Meter():
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         telegram['gas-m3'] = telegram['gas']
         telegram['DateTime'] = st
+        telegram['TimeStamp'] = ts
 
         self.logger.debug("***** Processed Message Start *****")
         self.logger.debug(telegram)
