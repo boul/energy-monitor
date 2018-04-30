@@ -1,5 +1,6 @@
 import serial
 import logging
+import datetime
 
 
 _tst = lambda x: (2000+int(x[0:2]),
@@ -16,6 +17,7 @@ _blackhole = lambda x: int(0)
 
 module_logger = logging.getLogger(__name__)
 
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 OBIS = {
     '0-0:96.1.1': ('serial_id', _blackhole),
@@ -159,6 +161,7 @@ class Meter():
             telegram[name] = data
 
         telegram['gas-m3'] = telegram['gas']
+        telegram['DateTime'] = st
 
         self.logger.debug("***** Processed Message Start *****")
         self.logger.debug(telegram)
