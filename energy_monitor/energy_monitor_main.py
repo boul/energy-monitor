@@ -819,7 +819,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
             #
             # client.publish(topic + "/timestamp", str(int(time.time())))
             logger.debug(p1_data)
-            client.publish(topic + "/p1", p1_data, qos=1)
+            client.publish(topic + "/p1", p1_data.replace("-", "_"), qos=1)
 
             for k, v in glob_p1_data.iteritems():
 
