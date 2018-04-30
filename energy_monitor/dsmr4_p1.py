@@ -18,8 +18,7 @@ _blackhole = lambda x: int(0)
 
 module_logger = logging.getLogger(__name__)
 
-ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
 
 OBIS = {
     '0-0:96.1.1': ('serial_id', _blackhole),
@@ -162,6 +161,8 @@ class Meter():
 
             telegram[name] = data
 
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         telegram['gas-m3'] = telegram['gas']
         telegram['DateTime'] = st
 

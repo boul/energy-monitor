@@ -812,6 +812,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'p1' and 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
+            # ugly hack for now as aws IoT analytics does requires _
             p1_data = json.dumps(glob_p1_data).replace("-", "_")
 
             # power_data['p1'] = p1_data
@@ -825,7 +826,7 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
             for k, v in glob_p1_data.iteritems():
 
                 logger.debug("Topic: {0}/p1 Key: {1} Value: {2}"
-                             .format(topic, k, v))
+                             .format(topic, k.replace("-", "_"), v))
                 # client.publish(topic + "/" + k, v)
 
         else:
