@@ -812,14 +812,15 @@ def thread_send_to_mqtt(interval, config, data_type, daemon):
     if data_type == 'p1' and 'glob_p1_data' in globals():
         if glob_p1_data is not None:
 
-            p1_data = json.dumps(glob_p1_data)
+            p1_data = json.dumps(glob_p1_data).replace("-", "_")
+
             # power_data['p1'] = p1_data
             # print "**********************"
             # print power_data
             #
             # client.publish(topic + "/timestamp", str(int(time.time())))
             logger.debug(p1_data)
-            client.publish(topic + "/p1", p1_data.replace("-", "_"), qos=1)
+            client.publish(topic + "/p1", p1_data, qos=1)
 
             for k, v in glob_p1_data.iteritems():
 
